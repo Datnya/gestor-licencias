@@ -54,6 +54,10 @@ window.clientDetailPage = {
       } else {
         html += `<div class="flex flex-col gap-3 mb-6">`;
         for (const l of licenses) {
+          const software = await window.dbAPI.getSoftware(l.software_id);
+          const swName = software ? software.name : 'Software Desconocido';
+          const repoPath = software ? software.repo_path : null;
+          
           const typeIcon = l.type === 'PC' 
             ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`
             : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`;
@@ -71,13 +75,14 @@ window.clientDetailPage = {
                   </div>
                   <div>
                     <div class="font-bold text-gray-800">${l.code}</div>
+                    <div class="text-xs text-primary font-semibold">${swName}</div>
                     <div class="text-xs text-gray-500 mt-1">Dispositivo: ${l.device_code}</div>
                   </div>
                 </div>
                 ${statusBadge}
               </div>
               <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                <button class="btn btn-outline btn-sm flex-1" onclick="window.clientDetailPage.toggleStatus(${l.id}, '${l.code}', '${l.status}')">
+                <button class="btn btn-outline btn-sm flex-1" onclick="window.clientDetailPage.toggleStatus(${l.id}, '${l.code}', '${l.status}', '${repoPath}')">
                   ${l.status === 'active' ? 'Suspender' : 'Reactivar'}
                 </button>
               </div>
@@ -160,7 +165,12 @@ window.clientDetailPage = {
     });
   },
   
-  toggleStatus: async (localId, code, currentStatus) => {
+  toggleStatus: async (localId, code, currentStatus, repoPath) => {
+    if (!repoPath || repoPath === 'null') {
+      window.toast.error('Error', 'No se encontró el repositorio asociado a este software.');
+      return;
+    }
+    
     const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
     const actionName = newStatus === 'active' ? 'Reactivar' : 'Suspender';
     
@@ -171,14 +181,14 @@ window.clientDetailPage = {
       onConfirm: async () => {
         try {
           // Update GitHub
-          const file = await window.githubAPI.getLicensesFile();
+          const file = await window.githubAPI.getLicensesFile(repoPath);
           let content = file.content;
           const idx = content.licenses.findIndex(l => l.code === code);
           if (idx === -1) throw new Error("Licencia no encontrada en GitHub");
           
           content.licenses[idx].status = newStatus;
           
-          await window.githubAPI.updateLicensesFile(content, file.sha, `${actionName} licencia: ${code}`);
+          await window.githubAPI.updateLicensesFile(repoPath, content, file.sha, `${actionName} licencia: ${code}`);
           
           // Update Local
           const localLicense = await db.licenses.get(localId);

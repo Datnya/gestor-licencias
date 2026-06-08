@@ -1,10 +1,19 @@
 // Local Database using Dexie.js
 const db = new Dexie("GestorLicenciasDB");
 
-db.version(1).stores({
+db.version(2).stores({
   clients: '++id, business_name, owner_name, phone, address, created_at',
-  licenses: '++id, client_id, code, type, device_code, status, purchase_date',
-  payments: '++id, client_id, license_id, concept, due_date, paid'
+  licenses: '++id, client_id, software_id, code, type, device_code, status, purchase_date',
+  payments: '++id, client_id, license_id, software_id, concept, due_date, paid',
+  software: '++id, name, repo_path, default_price, active'
+});
+
+// Initialize default software if empty
+db.on('populate', () => {
+  db.software.bulkAdd([
+    { name: 'Control de Lavandería', repo_path: 'Datnya/controlavander-a', default_price: 200, active: 1 },
+    { name: 'Control de Estacionamiento', repo_path: 'Datnya/control-estacionamiento', default_price: 300, active: 1 }
+  ]);
 });
 
 window.dbAPI = {
@@ -41,8 +50,13 @@ window.dbAPI = {
   getDashboardStats: async () => {
     const licenses = await db.licenses.toArray();
     const active = licenses.filter(l => l.status === 'active');
-    const pc = licenses.filter(l => l.type === 'PC');
-    const mobile = licenses.filter(l => l.type === 'Móvil');
+    
+    // Group by software
+    const software = await db.software.toArray();
+    const softwareCounts = {};
+    for (const sw of software) {
+      softwareCounts[sw.name] = licenses.filter(l => l.software_id === sw.id).length;
+    }
     
     const pendingPayments = await db.payments.filter(p => !p.paid).toArray();
     
@@ -52,19 +66,23 @@ window.dbAPI = {
     nextMonth.setDate(today.getDate() + 30);
     
     const maintenancePayments = await db.payments.filter(p => 
-      p.concept === 'Mantenimiento' && 
+      p.concept.includes('Mantenimiento') && 
       !p.paid && 
       new Date(p.due_date) <= nextMonth
     ).toArray();
 
     return {
       totalActive: active.length,
-      pcCount: pc.length,
-      mobileCount: mobile.length,
+      softwareCounts,
       pendingCount: pendingPayments.length,
       renewalsCount: maintenancePayments.length,
       pendingPayments,
       maintenancePayments
     };
-  }
+  },
+  
+  // Software Catalog
+  getAllSoftware: async () => await db.software.where('active').equals(1).toArray(),
+  getSoftware: async (id) => await db.software.get(id),
+  saveSoftware: async (data) => await db.software.put(data)
 };

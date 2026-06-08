@@ -6,8 +6,20 @@ window.newLicensePage = {
         <h2 class="font-bold text-xl mb-6">Nueva Licencia</h2>
         
         <div id="newLicenseWizard">
+          <!-- Paso 0: Selección de Software -->
+          <div class="card wizard-step active" id="step0">
+            <h3 class="font-semibold mb-4 text-center">Software a Vender</h3>
+            <div class="form-group">
+              <label class="form-label">Selecciona el Software</label>
+              <select id="nlSoftware" class="form-select">
+                <option value="">Cargando catálogo...</option>
+              </select>
+            </div>
+            <button class="btn btn-primary mt-2" onclick="window.newLicensePage.nextStep(1)">Continuar</button>
+          </div>
+
           <!-- Paso 1 -->
-          <div class="card wizard-step active" id="step1">
+          <div class="card wizard-step" id="step1" style="display:none">
             <h3 class="font-semibold mb-4 text-center">Tipo de Licencia</h3>
             <div class="grid grid-cols-2 gap-4">
               <button class="btn btn-outline flex flex-col items-center py-6 h-auto" onclick="window.newLicensePage.selectType('PC')">
@@ -25,7 +37,7 @@ window.newLicensePage = {
           <div class="card wizard-step" id="step2" style="display:none">
             <h3 class="font-semibold mb-4 text-center">Datos del Cliente</h3>
             <div class="form-group">
-              <label class="form-label">Nombre del Negocio (Lavandería)</label>
+              <label class="form-label">Nombre del Negocio</label>
               <input type="text" id="nlBusiness" class="form-input" placeholder="Ej: Lavandería Burbujas">
             </div>
             <div class="form-group">
@@ -59,14 +71,25 @@ window.newLicensePage = {
           <!-- Paso 4 -->
           <div class="card wizard-step" id="step4" style="display:none">
             <h3 class="font-semibold mb-4 text-center">Plan de Pago</h3>
-            <div class="text-sm text-gray-500 mb-4 text-center">Selecciona cómo pagará el cliente (Total S/ 200)</div>
+            <div class="text-sm text-gray-500 mb-4 text-center">Configura el precio y el plan de pago.</div>
             
+            <div class="form-group">
+              <label class="form-label">Monto Total de Venta (S/)</label>
+              <input type="number" id="nlPrice" class="form-input" value="200" onchange="window.newLicensePage.updatePrices()">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mantenimiento Anual (USD)</label>
+              <input type="number" id="nlMaintenance" class="form-input" value="15">
+            </div>
+
+            <label class="form-label mt-6 mb-2">Forma de Pago</label>
             <div class="flex flex-col gap-3">
               <label class="card p-4 m-0 border border-primary-500 bg-primary-50 flex items-center gap-3 cursor-pointer" id="optPagoTotal" onclick="window.newLicensePage.selectPayment('total')">
                 <input type="radio" name="payPlan" value="total" checked class="w-5 h-5 accent-primary-600">
                 <div class="flex-1">
                   <div class="font-bold">Pago Único</div>
-                  <div class="text-sm text-gray-600">S/ 200.00 ahora</div>
+                  <div class="text-sm text-gray-600" id="lblTotalAmount">S/ 200.00 ahora</div>
                 </div>
               </label>
               
@@ -75,7 +98,7 @@ window.newLicensePage = {
                   <input type="radio" name="payPlan" value="cuotas" class="w-5 h-5 accent-primary-600">
                   <div class="flex-1">
                     <div class="font-bold">2 Cuotas</div>
-                    <div class="text-sm text-gray-600">S/ 100 ahora y S/ 100 en 1 mes</div>
+                    <div class="text-sm text-gray-600" id="lblCuotasAmount">S/ 100 ahora y S/ 100 en 1 mes</div>
                   </div>
                 </div>
               </label>
@@ -104,21 +127,37 @@ window.newLicensePage = {
   },
 
   state: {
+    softwareId: null,
+    software: null,
     type: null,
     client: {},
     deviceCode: null,
-    paymentPlan: 'total'
+    paymentPlan: 'total',
+    price: 200,
+    maintenance: 15
   },
 
   init: async () => {
-    // Reset wizard UI
     document.querySelectorAll('.wizard-step').forEach(el => el.style.display = 'none');
-    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step0').style.display = 'block';
     
-    // Check GitHub connection first
     if (!window.githubAPI.hasToken()) {
       window.toast.warning('Sin Configuración', 'Debes configurar tu Token de GitHub primero.');
       setTimeout(() => window.app.navigate('/settings'), 1500);
+      return;
+    }
+
+    try {
+      const softwares = await window.dbAPI.getAllSoftware();
+      const select = document.getElementById('nlSoftware');
+      if (softwares.length === 0) {
+        select.innerHTML = '<option value="">No hay software registrado</option>';
+        window.toast.warning('Catálogo vacío', 'Registra al menos un software en Ajustes.');
+      } else {
+        select.innerHTML = softwares.map(sw => `<option value="${sw.id}">${sw.name}</option>`).join('');
+      }
+    } catch (e) {
+      console.error(e);
     }
   },
 
@@ -140,8 +179,28 @@ window.newLicensePage = {
     document.getElementById('optPagoCuotas').className = 'card p-4 m-0 border cursor-pointer ' + (plan==='cuotas' ? 'border-primary-500 bg-primary-50' : 'border-gray-200');
   },
 
-  nextStep: (step) => {
-    // Validation
+  updatePrices: () => {
+    const val = parseFloat(document.getElementById('nlPrice').value) || 0;
+    window.newLicensePage.state.price = val;
+    
+    const half = (val / 2).toFixed(2);
+    document.getElementById('lblTotalAmount').textContent = `S/ ${val.toFixed(2)} ahora`;
+    document.getElementById('lblCuotasAmount').textContent = `S/ ${half} ahora y S/ ${half} en 1 mes`;
+  },
+
+  nextStep: async (step) => {
+    if (step === 1) {
+      const swId = parseInt(document.getElementById('nlSoftware').value);
+      if (!swId) {
+        window.toast.error('Error', 'Selecciona un software'); return;
+      }
+      const software = await window.dbAPI.getSoftware(swId);
+      window.newLicensePage.state.softwareId = swId;
+      window.newLicensePage.state.software = software;
+      document.getElementById('nlPrice').value = software.default_price;
+      window.newLicensePage.updatePrices();
+    }
+    
     if (step === 3) {
       const bname = document.getElementById('nlBusiness').value.trim();
       const owner = document.getElementById('nlOwner').value.trim();
@@ -173,9 +232,10 @@ window.newLicensePage = {
     btn.disabled = true;
     
     try {
-      const isUsed = await window.githubAPI.isDeviceUsed(code);
+      const sw = window.newLicensePage.state.software;
+      const isUsed = await window.githubAPI.isDeviceUsed(sw.repo_path, code);
       if (isUsed) {
-        window.toast.error('Error', 'Este dispositivo ya está vinculado a otra licencia.');
+        window.toast.error('Error', 'Este dispositivo ya está vinculado a otra licencia en este repositorio.');
         btn.textContent = 'Validar y Continuar';
         btn.disabled = false;
         return;
@@ -192,36 +252,36 @@ window.newLicensePage = {
   
   createLicense: async () => {
     const s = window.newLicensePage.state;
-    const prefix = s.type === 'Móvil' ? 'LAV-MOB-' : 'LAV-PC-';
-    // Generate code: LAV-MOB-ABCD-1234
+    // Prefix for code based on software. Let's use first 3 letters of software name
+    const swPrefix = s.software.name.substring(0,3).toUpperCase();
+    const typePrefix = s.type === 'Móvil' ? 'MOB' : 'PC';
+    
     const p1 = Math.random().toString(36).substr(2,4).toUpperCase();
     const p2 = Math.random().toString(36).substr(2,4).toUpperCase();
-    const licenseCode = `${prefix}${p1}-${p2}`;
+    const licenseCode = `${swPrefix}-${typePrefix}-${p1}-${p2}`;
     
     const btn = document.querySelector('#step4 .btn-primary');
     btn.textContent = 'Sincronizando con GitHub...';
     btn.disabled = true;
     
     try {
-      // 1. Guardar Cliente en Local
       const clientId = await db.clients.add({
         ...s.client,
         created_at: new Date().toISOString()
       });
       
-      // 2. Guardar Licencia en GitHub
       const ghLicense = {
         code: licenseCode,
         client_name: s.client.business_name,
         activated_device: s.deviceCode,
         status: "active"
       };
-      await window.githubAPI.addLicense(ghLicense);
+      await window.githubAPI.addLicense(s.software.repo_path, ghLicense);
       
-      // 3. Guardar Licencia en Local
       const now = new Date().toISOString();
       const licenseId = await db.licenses.add({
         client_id: clientId,
+        software_id: s.softwareId,
         code: licenseCode,
         type: s.type,
         device_code: s.deviceCode,
@@ -229,44 +289,43 @@ window.newLicensePage = {
         purchase_date: now
       });
       
-      // 4. Guardar Pagos en Local
+      const totalPrice = s.price;
+      const maintenance = parseFloat(document.getElementById('nlMaintenance').value) || 15;
+      
       if (s.paymentPlan === 'total') {
         await db.payments.add({
-          client_id: clientId, license_id: licenseId,
+          client_id: clientId, license_id: licenseId, software_id: s.softwareId,
           concept: 'Compra de Software (Pago Único)',
-          amount: 200, currency: 'PEN',
+          amount: totalPrice, currency: 'PEN',
           due_date: now, paid: true, paid_date: now
         });
       } else {
-        // Cuota 1
+        const half = totalPrice / 2;
         await db.payments.add({
-          client_id: clientId, license_id: licenseId,
+          client_id: clientId, license_id: licenseId, software_id: s.softwareId,
           concept: 'Cuota 1/2',
-          amount: 100, currency: 'PEN',
+          amount: half, currency: 'PEN',
           due_date: now, paid: true, paid_date: now
         });
-        // Cuota 2
         const nextMonth = new Date();
         nextMonth.setMonth(nextMonth.getMonth() + 1);
         await db.payments.add({
-          client_id: clientId, license_id: licenseId,
+          client_id: clientId, license_id: licenseId, software_id: s.softwareId,
           concept: 'Cuota 2/2',
-          amount: 100, currency: 'PEN',
+          amount: half, currency: 'PEN',
           due_date: nextMonth.toISOString(), paid: false
         });
       }
       
-      // Generate Next Year Maintenance
       const nextYear = new Date();
       nextYear.setFullYear(nextYear.getFullYear() + 1);
       await db.payments.add({
-        client_id: clientId, license_id: licenseId,
+        client_id: clientId, license_id: licenseId, software_id: s.softwareId,
         concept: 'Mantenimiento Anual',
-        amount: 15, currency: 'USD',
+        amount: maintenance, currency: 'USD',
         due_date: nextYear.toISOString(), paid: false
       });
       
-      // Mostrar Éxito
       document.getElementById('nlResultCode').textContent = licenseCode;
       window.newLicensePage.nextStep(5);
       

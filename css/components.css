@@ -41,15 +41,15 @@
 .card {
   background: var(--color-white);
   border-radius: var(--radius-xl);
-  padding: 20px;
+  padding: 24px;
   box-shadow: var(--shadow-sm);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   border: 1px solid var(--color-gray-100);
 }
 
 /* Forms */
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .form-label {

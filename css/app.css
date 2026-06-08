@@ -67,8 +67,8 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px;
-  padding-bottom: 90px; /* Space for bottom nav */
+  padding: 24px 20px;
+  padding-bottom: 100px; /* Space for bottom nav */
   background-color: var(--color-gray-50);
 }
 
@@ -186,7 +186,7 @@
 
 /* Client List */
 .client-card {
-  padding: 16px;
+  padding: 20px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -199,7 +199,7 @@
 
 .search-box {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .search-box svg {

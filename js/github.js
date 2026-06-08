@@ -9,7 +9,7 @@ window.githubAPI = {
   hasToken: () => !!localStorage.getItem('gh_token'),
 
   // Call GitHub API
-  _callAPI: async (method, path, body = null) => {
+  _callAPI: async (method, repoPath, body = null) => {
     const token = window.githubAPI.getToken();
     if (!token) throw new Error('No GitHub token configured');
 
@@ -22,7 +22,7 @@ window.githubAPI = {
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
 
-    const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+    const url = `https://api.github.com/repos/${repoPath}/contents/${GITHUB_FILE_PATH}`;
     
     // Add cache buster for GET
     const finalUrl = method === 'GET' ? `${url}?t=${Date.now()}` : url;
@@ -43,9 +43,9 @@ window.githubAPI = {
   },
 
   // Read licenses.json
-  getLicensesFile: async () => {
+  getLicensesFile: async (repoPath) => {
     try {
-      const data = await window.githubAPI._callAPI('GET', '');
+      const data = await window.githubAPI._callAPI('GET', repoPath);
       if (data.exists === false) {
         return { sha: null, content: { licenses: [] } };
       }
@@ -64,7 +64,7 @@ window.githubAPI = {
   },
 
   // Write licenses.json
-  updateLicensesFile: async (contentObj, sha, commitMessage = 'Update licenses via Gestor') => {
+  updateLicensesFile: async (repoPath, contentObj, sha, commitMessage = 'Update licenses via Gestor') => {
     try {
       // Encode to base64 properly handling utf8
       const jsonString = JSON.stringify(contentObj, null, 2);
@@ -76,7 +76,7 @@ window.githubAPI = {
         sha: sha // required for updates
       };
 
-      const result = await window.githubAPI._callAPI('PUT', '', body);
+      const result = await window.githubAPI._callAPI('PUT', repoPath, body);
       return result.content.sha;
     } catch (e) {
       console.error('Error writing licenses.json', e);
@@ -85,8 +85,8 @@ window.githubAPI = {
   },
 
   // Helper to add a single license
-  addLicense: async (licenseObj) => {
-    const file = await window.githubAPI.getLicensesFile();
+  addLicense: async (repoPath, licenseObj) => {
+    const file = await window.githubAPI.getLicensesFile(repoPath);
     let content = file.content;
     
     // Initialize if empty
@@ -98,14 +98,14 @@ window.githubAPI = {
     
     content.licenses.push(licenseObj);
     
-    await window.githubAPI.updateLicensesFile(content, file.sha, `Añadida licencia: ${licenseObj.code}`);
+    await window.githubAPI.updateLicensesFile(repoPath, content, file.sha, `Añadida licencia: ${licenseObj.code}`);
     return true;
   },
   
   // Check if a device code is already used in GitHub
-  isDeviceUsed: async (deviceCode) => {
+  isDeviceUsed: async (repoPath, deviceCode) => {
     if (!deviceCode || deviceCode === "") return false;
-    const file = await window.githubAPI.getLicensesFile();
+    const file = await window.githubAPI.getLicensesFile(repoPath);
     const licenses = file.content.licenses || [];
     return licenses.some(l => l.activated_device === deviceCode);
   }
