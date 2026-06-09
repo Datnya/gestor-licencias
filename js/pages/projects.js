@@ -5,7 +5,7 @@ window.projectsPage = {
       <div class="page-content">
         <div class="section-header mb-24">
           <h2 class="section-title">Mis Proyectos</h2>
-          <button class="btn btn-outline btn-sm" style="width:auto;font-size:0.78rem" onclick="window.projectsPage.showAddSoftware(); window.projectsPage._pendingReload = true;">+ Nuevo</button>
+          <button class="btn btn-outline btn-sm" style="width:auto;font-size:0.78rem" onclick="window.projectsPage.showAddSoftware()">+ Nuevo Proyecto</button>
         </div>
         <p class="text-sm text-gray-500 mb-24">Toca un proyecto para ver sus detalles y editar sus precios.</p>
 

@@ -36,11 +36,8 @@
 }
 
 .header-logo img {
-  height: 80px;
+  height: 55px;
   object-fit: contain;
-  transform: scale(2.2);
-  transform-origin: left center;
-  mix-blend-mode: screen;
 }
 
 .status-indicator {
