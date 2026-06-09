@@ -14,17 +14,14 @@ window.clientsPage = {
           <input type="text" id="inputClientSearch" class="form-input" placeholder="Buscar por nombre o celular...">
         </div>
 
-        <!-- Filter chips -->
-        <div class="filter-bar mb-20">
-          <div class="filter-chip active" data-filter="all" onclick="window.clientsPage.setFilter('all', this)">Todos</div>
-          <div class="filter-chip" data-filter="pending" onclick="window.clientsPage.setFilter('pending', this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            Pago Pendiente
-          </div>
-          <div class="filter-chip" data-filter="dateRange" onclick="window.clientsPage.showDateFilter()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Filtrar por Fecha
-          </div>
+        <div class="flex gap-2 mb-20">
+          <select id="clientFilterSelect" class="form-select flex-1" onchange="window.clientsPage.handleFilterChange(this.value)">
+            <option value="all">Todos los clientes</option>
+            <option value="pending">Pago Pendiente</option>
+            <option value="newest">Más recientes primero</option>
+            <option value="oldest">Más antiguos primero</option>
+            <option value="dateRange">Filtrar por rango de fechas...</option>
+          </select>
         </div>
         
         <div id="clientsList" class="card p-0 overflow-hidden">
@@ -46,11 +43,13 @@ window.clientsPage = {
     });
   },
 
-  setFilter: (filter, el) => {
-    window.clientsPage.currentFilter = filter;
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    window.clientsPage.renderClients(document.getElementById('inputClientSearch').value.trim());
+  handleFilterChange: (val) => {
+    if (val === 'dateRange') {
+      window.clientsPage.showDateFilter();
+    } else {
+      window.clientsPage.currentFilter = val;
+      window.clientsPage.renderClients(document.getElementById('inputClientSearch').value.trim());
+    }
   },
 
   showDateFilter: () => {
@@ -72,14 +71,12 @@ window.clientsPage = {
         const to = document.getElementById('filterDateTo').value;
         if (!from) {
           window.toast.error('Error', 'Selecciona la fecha de inicio');
+          document.getElementById('clientFilterSelect').value = 'all';
           return true;
         }
         window.clientsPage._dateFrom = from;
         window.clientsPage._dateTo = to;
         window.clientsPage.currentFilter = 'dateRange';
-        
-        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        document.querySelector('.filter-chip[data-filter="dateRange"]').classList.add('active');
         
         await window.clientsPage.renderClients(document.getElementById('inputClientSearch').value.trim());
       }
@@ -106,6 +103,10 @@ window.clientsPage = {
           const d = new Date(c.created_at);
           return d >= from && d <= to;
         });
+      } else if (window.clientsPage.currentFilter === 'newest') {
+        clients = clients.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      } else if (window.clientsPage.currentFilter === 'oldest') {
+        clients = clients.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
       }
       
       if (clients.length === 0) {

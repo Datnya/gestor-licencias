@@ -79,6 +79,7 @@ window.app = {
     let tabId = 'dashboard';
     if (route === '/clients' || route === '/client-detail') tabId = 'clients';
     else if (route === '/new') tabId = 'new';
+    else if (route === '/projects') tabId = 'projects';
     else if (route === '/settings') tabId = 'settings';
     
     const activeTab = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
@@ -118,12 +119,18 @@ window.app = {
         mainContent.appendChild(pageEl);
         if (window.settingsPage.init) await window.settingsPage.init();
       }
+      else if (route === '/projects') {
+        pageEl.innerHTML = await window.projectsPage.render();
+        mainContent.appendChild(pageEl);
+        if (window.projectsPage.init) await window.projectsPage.init();
+      }
       
       // Update page title
       let title = "Gestor Licencias";
       if (route === '/new') title = "Nueva Licencia";
       else if (route === '/clients') title = "Mis Clientes";
       else if (route === '/client-detail') title = "Detalle del Cliente";
+      else if (route === '/projects') title = "Proyectos";
       else if (route === '/settings') title = "Configuración";
       
       const titleEl = document.getElementById('appTitle');

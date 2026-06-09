@@ -10,7 +10,7 @@
 
 /* ===== HEADER ===== */
 .header {
-  height: 70px;
+  height: 140px;
   background-color: var(--color-black);
   position: fixed;
   top: 0;
@@ -35,7 +35,7 @@
 }
 
 .header-logo img {
-  height: 48px;
+  height: 120px;
   object-fit: contain;
 }
 
@@ -75,7 +75,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-top: 70px;  /* header height */
+  padding-top: 140px;  /* header height */
   padding-bottom: 80px; /* nav height */
   background-color: var(--color-gray-50);
 }
@@ -486,13 +486,32 @@
 
 /* ===== LOADING SCREEN ===== */
 .loading-screen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--color-black);
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 60vh;
-  gap: 16px;
-  color: var(--color-gray-500);
+  color: var(--color-white);
+}
+
+.loading-logo {
+  height: 180px;
+  margin-bottom: 30px;
+  animation: pulseLogo 2.5s infinite;
+}
+
+@keyframes pulseLogo {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+.spinner-light {
+  border: 3px solid rgba(255,255,255,0.1);
+  border-left-color: var(--color-white);
 }
 
 /* ===== UTILITIES ===== */
