@@ -37,7 +37,16 @@ window.app = {
     text.textContent = 'Verificando...';
     
     try {
-      await window.githubAPI.getLicensesFile();
+      // Validate token by calling the authenticated user endpoint
+      const token = window.githubAPI.getToken();
+      const response = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      if (!response.ok) throw new Error('Token inválido');
+      
       indicator.className = 'status-indicator online';
       text.textContent = 'Conectado a GitHub';
       return true;
@@ -117,7 +126,8 @@ window.app = {
       else if (route === '/client-detail') title = "Detalle del Cliente";
       else if (route === '/settings') title = "Configuración";
       
-      document.getElementById('appTitle').textContent = title;
+      const titleEl = document.getElementById('appTitle');
+      if (titleEl) titleEl.textContent = title;
       
     } catch (e) {
       console.error(e);

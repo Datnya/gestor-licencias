@@ -3,7 +3,7 @@ window.clientDetailPage = {
   render: async (id) => {
     return `
       <div class="page-content pb-20">
-        <div class="mb-4">
+        <div class="mb-16">
           <button class="btn btn-ghost btn-sm pl-0 text-gray-500 hover:text-gray-800" onclick="window.app.navigate('/clients')" style="width:auto">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="15 18 9 12 15 6"></polyline></svg>
             Volver
@@ -13,6 +13,9 @@ window.clientDetailPage = {
         <div id="clientDetailContainer">
           <div class="text-center py-10"><div class="spinner mx-auto"></div></div>
         </div>
+        
+        <!-- Contenedor oculto para renderizar el recibo antes de convertirlo a imagen -->
+        <div id="receiptRenderContainer" style="position: absolute; left: -9999px; top: 0;"></div>
       </div>
     `;
   },
@@ -34,25 +37,40 @@ window.clientDetailPage = {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             ${client.owner_name}
           </p>
-          <div class="flex items-center gap-4 mt-3">
-            <a href="tel:${client.phone}" class="flex items-center gap-1 text-white opacity-90 hover:opacity-100 text-sm bg-white/20 px-3 py-1 rounded-full">
+          <div class="mt-2 text-sm" style="opacity:0.8">
+            <div class="flex items-center gap-2 mt-1">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              ${client.phone || 'Sin teléfono'}
+            </div>
+            ${client.address ? `
+            <div class="flex items-center gap-2 mt-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              ${client.address}
+            </div>` : ''}
+            <div class="flex items-center gap-2 mt-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Registrado: ${window.format.date(client.created_at)}
+            </div>
+          </div>
+          <div class="flex items-center gap-4 mt-4">
+            <a href="tel:${client.phone}" class="flex items-center gap-1 text-white opacity-90 hover:opacity-100 text-sm bg-white/20 px-3 py-2 rounded-lg transition-all" style="background:rgba(255,255,255,0.15)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
               Llamar
             </a>
-            <a href="https://wa.me/${client.phone.replace(/\D/g,'')}" target="_blank" class="flex items-center gap-1 text-white opacity-90 hover:opacity-100 text-sm bg-white/20 px-3 py-1 rounded-full">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+            <a href="https://wa.me/${client.phone.replace(/\D/g,'')}" target="_blank" class="flex items-center gap-2 text-white opacity-90 hover:opacity-100 text-sm bg-white/20 px-3 py-2 rounded-lg transition-all" style="background:rgba(255,255,255,0.15)">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
               WhatsApp
             </a>
           </div>
         </div>
       `;
 
-      // 1. Licencias
-      html += `<h3 class="font-bold text-lg mb-3">Licencias</h3>`;
+      // 1. Licencias Instaladas
+      html += `<div class="section-header"><h3 class="section-title">Software Instalado (${licenses.length})</h3></div>`;
       if (licenses.length === 0) {
-        html += `<div class="card p-4 text-center text-gray-500">No hay licencias</div>`;
+        html += `<div class="card p-4 text-center text-gray-500 mb-20">No hay licencias registradas</div>`;
       } else {
-        html += `<div class="flex flex-col gap-3 mb-6">`;
+        html += `<div class="flex flex-col gap-3 mb-24">`;
         for (const l of licenses) {
           const software = await window.dbAPI.getSoftware(l.software_id);
           const swName = software ? software.name : 'Software Desconocido';
@@ -67,22 +85,22 @@ window.clientDetailPage = {
             : `<span class="badge badge-danger">Suspendida</span>`;
 
           html += `
-            <div class="card p-4">
+            <div class="card" style="padding:16px;margin-bottom:0">
               <div class="flex justify-between items-start mb-3">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded bg-primary-100 text-primary-600 flex items-center justify-center">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
                     ${typeIcon}
                   </div>
                   <div>
-                    <div class="font-bold text-gray-800">${l.code}</div>
-                    <div class="text-xs text-primary font-semibold">${swName}</div>
+                    <div class="font-bold text-gray-900">${l.code}</div>
+                    <div class="text-xs text-primary-600 font-bold">${swName}</div>
                     <div class="text-xs text-gray-500 mt-1">Dispositivo: ${l.device_code}</div>
                   </div>
                 </div>
                 ${statusBadge}
               </div>
               <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                <button class="btn btn-outline btn-sm flex-1" onclick="window.clientDetailPage.toggleStatus(${l.id}, '${l.code}', '${l.status}', '${repoPath}')">
+                <button class="btn btn-outline btn-sm flex-1" style="font-size:0.75rem" onclick="window.clientDetailPage.toggleStatus(${l.id}, '${l.code}', '${l.status}', '${repoPath}')">
                   ${l.status === 'active' ? 'Suspender' : 'Reactivar'}
                 </button>
               </div>
@@ -92,16 +110,18 @@ window.clientDetailPage = {
         html += `</div>`;
       }
 
-      // 2. Historial de Pagos
-      html += `<div class="flex justify-between items-center mb-3 mt-6">
-                <h3 class="font-bold text-lg">Historial de Pagos</h3>
-                <button class="btn btn-ghost btn-sm text-primary" style="width:auto" onclick="window.clientDetailPage.addPayment(${client.id})">Añadir Pago</button>
-               </div>`;
+      // 2. Historial de Pagos y Pendientes
+      html += `
+        <div class="section-header mt-8">
+          <h3 class="section-title">Historial de Pagos</h3>
+          <button class="btn btn-ghost btn-sm text-primary-600" style="width:auto;font-weight:700" onclick="window.clientDetailPage.addPayment(${client.id})">+ Añadir</button>
+        </div>
+      `;
                
       if (payments.length === 0) {
         html += `<div class="card p-4 text-center text-gray-500">No hay pagos registrados</div>`;
       } else {
-        html += `<div class="card p-0 overflow-hidden">`;
+        html += `<div class="card p-0 overflow-hidden mb-8">`;
         // Sort payments: un-paid first, then by due_date
         const sortedPayments = payments.sort((a,b) => {
           if (a.paid !== b.paid) return a.paid ? 1 : -1;
@@ -111,21 +131,31 @@ window.clientDetailPage = {
         for (const p of sortedPayments) {
           const isOverdue = !p.paid && new Date(p.due_date) < new Date();
           
+          let swName = 'General';
+          if (p.software_id) {
+            const sw = await window.dbAPI.getSoftware(p.software_id);
+            if (sw) swName = sw.name;
+          }
+          
           html += `
-            <div class="p-4 border-b border-gray-100 last:border-b-0 flex justify-between items-center">
+            <div class="p-4 border-b border-gray-100 last:border-b-0 flex justify-between items-center ${!p.paid && isOverdue ? 'bg-danger-50' : ''}">
               <div>
-                <div class="font-semibold ${!p.paid ? 'text-gray-900' : 'text-gray-500 line-through'}">
+                <div class="font-bold ${!p.paid ? 'text-gray-900' : 'text-gray-500 line-through'}">
                   ${p.concept}
                 </div>
+                <div class="text-xs text-primary-600 font-semibold mt-1">${swName}</div>
                 <div class="text-xs text-gray-500 mt-1">
                   Vence: <span class="${isOverdue ? 'text-danger font-bold' : ''}">${window.format.date(p.due_date)}</span>
                 </div>
+                ${p.paid ? `<div class="text-xs text-success mt-1">Pagado el: ${window.format.date(p.paid_date)}</div>` : ''}
               </div>
               <div class="text-right">
-                <div class="font-bold ${!p.paid ? '' : 'text-gray-400'}">${window.format.currency(p.amount)}</div>
+                <div class="font-bold text-lg ${!p.paid ? 'text-gray-900' : 'text-gray-400'}">
+                  ${p.currency === 'USD' ? '$' : 'S/'}${parseFloat(p.amount).toFixed(2)}
+                </div>
                 ${!p.paid 
-                  ? `<button class="btn btn-primary btn-sm mt-2 py-1 px-3" onclick="window.clientDetailPage.markPaid(${p.id})">Cobrar</button>`
-                  : `<span class="badge badge-gray mt-1">Pagado ${window.format.date(p.paid_date)}</span>`
+                  ? `<button class="btn btn-primary btn-sm mt-3 py-1 px-4" onclick="window.clientDetailPage.markPaid(${p.id})">Cobrar</button>`
+                  : `<button class="btn btn-outline btn-sm mt-3 py-1 px-3 text-xs" onclick="window.clientDetailPage.generateReceipt(${p.id})">Ver Recibo</button>`
                 }
               </div>
             </div>
@@ -145,7 +175,7 @@ window.clientDetailPage = {
   markPaid: async (paymentId) => {
     window.modal.show({
       title: 'Confirmar Cobro',
-      content: '¿Estás seguro que deseas marcar esta cuota como pagada? Esta acción no se puede deshacer.',
+      content: '¿Estás seguro que deseas marcar este pago como completado?',
       confirmText: 'Sí, cobrar',
       onConfirm: async () => {
         try {
@@ -154,15 +184,132 @@ window.clientDetailPage = {
           p.paid_date = new Date().toISOString();
           await db.payments.put(p);
           
-          // Refrescar página
+          window.toast.success('Pago registrado', 'Generando recibo...');
+          
+          // Generar recibo automáticamente
+          await window.clientDetailPage.generateReceipt(paymentId);
+          
+          // Refrescar página en el fondo
           const clientId = p.client_id;
           await window.clientDetailPage.init(clientId);
-          window.toast.success('Pago registrado', 'La cuota ha sido marcada como pagada.');
+          
         } catch (e) {
           window.toast.error('Error', e.message);
         }
       }
     });
+  },
+  
+  generateReceipt: async (paymentId) => {
+    try {
+      const p = await db.payments.get(paymentId);
+      const c = await db.clients.get(p.client_id);
+      let swName = 'Servicio';
+      if (p.software_id) {
+        const sw = await window.dbAPI.getSoftware(p.software_id);
+        if (sw) swName = sw.name;
+      }
+      
+      const isAdvance = p.concept.includes('Cuota 1/2') || p.concept.includes('Adelanto');
+      const isBalance = p.concept.includes('Cuota 2/2') || p.concept.includes('Saldo');
+      const isTotal = p.concept.includes('Pago Único');
+      
+      let conceptDesc = p.concept;
+      if (isAdvance) conceptDesc += ' (Adelanto del 50%)';
+      if (isBalance) conceptDesc += ' (Saldo pendiente 50%)';
+      
+      const renderContainer = document.getElementById('receiptRenderContainer');
+      const currencySymbol = p.currency === 'USD' ? '$' : 'S/';
+      
+      renderContainer.innerHTML = `
+        <div id="receiptToRender" style="width:380px;background:white;padding:32px 24px;border-radius:12px;font-family:'Inter',sans-serif;color:#111827;">
+          <div style="text-align:center;margin-bottom:24px">
+            <h1 style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:#f97316;margin:0;letter-spacing:1px">FOXY STUDIO</h1>
+            <p style="font-size:12px;color:#6b7280;margin:4px 0 0 0">Software & Soluciones Digitales</p>
+          </div>
+          
+          <div style="text-align:center;margin-bottom:24px">
+            <h2 style="font-size:16px;font-weight:700;margin:0">COMPROBANTE DE PAGO</h2>
+            <p style="font-size:12px;color:#6b7280;margin:4px 0 0 0">${window.format.datetime(p.paid_date)}</p>
+          </div>
+          
+          <div style="border-top:2px dashed #e5e7eb;border-bottom:2px dashed #e5e7eb;padding:16px 0;margin-bottom:24px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px">
+              <span style="color:#6b7280">Cliente:</span>
+              <span style="font-weight:600;text-align:right">${c.business_name}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px">
+              <span style="color:#6b7280">Contacto:</span>
+              <span style="font-weight:600;text-align:right">${c.owner_name}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:#6b7280">Software:</span>
+              <span style="font-weight:600;color:#ea580c;text-align:right">${swName}</span>
+            </div>
+          </div>
+          
+          <div style="margin-bottom:24px">
+            <div style="font-weight:700;font-size:14px;margin-bottom:8px">Detalle:</div>
+            <div style="font-size:13px;color:#374151;line-height:1.5">${conceptDesc}</div>
+          </div>
+          
+          <div style="background:#f9fafb;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:700;font-size:16px">TOTAL PAGADO</span>
+            <span style="font-weight:800;font-size:22px;color:#111827">${currencySymbol}${parseFloat(p.amount).toFixed(2)}</span>
+          </div>
+          
+          ${isAdvance ? `
+          <div style="text-align:center;margin-top:16px;font-size:12px;color:#ea580c;font-weight:600;background:#fff7ed;padding:8px;border-radius:6px">
+            * Pendiente cancelar el 50% restante el próximo mes.
+          </div>
+          ` : ''}
+          
+          <div style="text-align:center;margin-top:32px;font-size:12px;color:#9ca3af">
+            ¡Gracias por confiar en Foxy Studio!
+          </div>
+        </div>
+      `;
+      
+      const receiptEl = document.getElementById('receiptToRender');
+      const canvas = await html2canvas(receiptEl, {
+        scale: 2,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/jpeg', 0.9);
+      
+      // Construir mensaje de WhatsApp
+      let msg = `Hola *${c.owner_name}*, te envío el comprobante de pago por el software *${swName}*.\n\nMonto pagado: *${currencySymbol}${parseFloat(p.amount).toFixed(2)}*.\nConcepto: ${conceptDesc}`;
+      if (isAdvance) {
+        msg += `\n\n_Recuerda que queda pendiente el 50% para el próximo mes._`;
+      }
+      msg += `\n\n¡Gracias por confiar en Foxy Studio!`;
+      
+      const phoneClean = c.phone ? c.phone.replace(/\D/g,'') : '';
+      const waUrl = `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`;
+      
+      // Mostrar modal con la imagen y el botón de WhatsApp
+      window.modal.show({
+        title: 'Comprobante Generado',
+        content: `
+          <div class="text-center mb-4">
+            <img src="${imgData}" style="max-width:100%;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
+          </div>
+          <div class="text-sm text-gray-500 text-center mb-4">
+            Guarda esta imagen manteniéndola presionada, o envíala por WhatsApp.
+          </div>
+          <a href="${waUrl}" target="_blank" class="btn" style="background:#25D366;color:white;text-decoration:none;display:flex;justify-content:center;align-items:center;gap:8px;padding:12px">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+            Enviar por WhatsApp
+          </a>
+        `,
+        confirmText: 'Cerrar',
+        onConfirm: () => {}
+      });
+      
+    } catch (e) {
+      window.toast.error('Error al generar recibo', e.message);
+    }
   },
   
   toggleStatus: async (localId, code, currentStatus, repoPath) => {
@@ -180,7 +327,6 @@ window.clientDetailPage = {
       confirmText: actionName,
       onConfirm: async () => {
         try {
-          // Update GitHub
           const file = await window.githubAPI.getLicensesFile(repoPath);
           let content = file.content;
           const idx = content.licenses.findIndex(l => l.code === code);
@@ -190,43 +336,67 @@ window.clientDetailPage = {
           
           await window.githubAPI.updateLicensesFile(repoPath, content, file.sha, `${actionName} licencia: ${code}`);
           
-          // Update Local
           const localLicense = await db.licenses.get(localId);
           localLicense.status = newStatus;
           await db.licenses.put(localLicense);
           
-          // Refrescar
           await window.clientDetailPage.init(localLicense.client_id);
           window.toast.success('Actualizado', `La licencia ha sido ${newStatus === 'active' ? 'reactivada' : 'suspendida'}.`);
         } catch (e) {
           window.toast.error('Error al actualizar', e.message);
-          return true; // Keep modal open
+          return true;
         }
       }
     });
   },
   
   addPayment: async (clientId) => {
-    // Simple direct addition for Maintenance fee
+    // Show a modal to choose payment type
     window.modal.show({
-      title: 'Añadir Pago de Mantenimiento',
-      content: 'Se generará una cuota de $15.00 USD por mantenimiento anual que vence hoy.',
-      confirmText: 'Crear Pago',
+      title: 'Añadir Nuevo Cobro',
+      content: `
+        <div class="form-group">
+          <label class="form-label">Concepto</label>
+          <input type="text" id="newPayConcept" class="form-input" placeholder="Ej: Servicio Técnico, Mantenimiento...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monto</label>
+          <input type="number" id="newPayAmount" class="form-input" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Moneda</label>
+          <select id="newPayCurrency" class="form-select">
+            <option value="PEN">Soles (S/)</option>
+            <option value="USD">Dólares ($)</option>
+          </select>
+        </div>
+      `,
+      confirmText: 'Crear Cobro',
       onConfirm: async () => {
         try {
+          const concept = document.getElementById('newPayConcept').value.trim();
+          const amount = parseFloat(document.getElementById('newPayAmount').value) || 0;
+          const currency = document.getElementById('newPayCurrency').value;
+          
+          if (!concept || amount <= 0) {
+            window.toast.error('Error', 'Ingresa un concepto y un monto válido.');
+            return true;
+          }
+          
           const now = new Date().toISOString();
           await db.payments.add({
             client_id: clientId,
             license_id: null,
-            concept: 'Mantenimiento Anual',
-            amount: 15.00, // USD conceptually, UI shows S/ for now - can be improved
-            currency: 'USD',
+            software_id: null,
+            concept: concept,
+            amount: amount,
+            currency: currency,
             due_date: now,
             paid: false,
             created_at: now
           });
           await window.clientDetailPage.init(clientId);
-          window.toast.success('Pago Creado', 'Se ha añadido la cuota al historial.');
+          window.toast.success('Cobro Creado', 'Se ha añadido al historial.');
         } catch (e) {
           window.toast.error('Error', e.message);
         }

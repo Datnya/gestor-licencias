@@ -8,17 +8,27 @@ window.format = {
   date: (isoString) => {
     if (!isoString) return '-';
     const d = new Date(isoString);
-    return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
   },
 
   datetime: (isoString) => {
     if (!isoString) return '-';
     const d = new Date(isoString);
-    return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
   },
   
-  generateId: () => {
-    return Math.random().toString(36).substr(2, 9);
+  generateDeviceCode: () => {
+    return 'DEV-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+  },
+  
+  generateLicenseCode: () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for(let i=0; i<4; i++) {
+      for(let j=0; j<4; j++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+      if(i<3) code += '-';
+    }
+    return code;
   }
 };
 
@@ -26,63 +36,63 @@ window.toast = {
   show: (title, message, type = 'info') => {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = `toast toast-${type}`;
     
     let icon = '';
-    if (type === 'success') icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:var(--color-success)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-    else if (type === 'error') icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:var(--color-danger)"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    if (type === 'success') icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+    else if (type === 'error') icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
     
     toast.innerHTML = `
-      ${icon}
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:14px">${title}</div>
-        <div style="font-size:12px;opacity:0.8;margin-top:2px">${message}</div>
+      <div class="toast-icon">${icon}</div>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
       </div>
     `;
     
     container.appendChild(toast);
     
+    // Animate in
+    setTimeout(() => toast.style.transform = 'translateY(0)', 10);
+    
+    // Auto remove
     setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(-20px)';
+      toast.style.transform = 'translateY(120%)';
       setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    }, 3000);
   },
   success: (title, msg) => window.toast.show(title, msg, 'success'),
-  error: (title, msg) => window.toast.show(title, msg, 'error'),
-  info: (title, msg) => window.toast.show(title, msg, 'info')
+  error: (title, msg) => window.toast.show(title, msg, 'error')
 };
 
 window.modal = {
   show: (options) => {
     const container = document.getElementById('modalContainer');
-    const bg = document.createElement('div');
-    bg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.2s';
-    
-    const card = document.createElement('div');
-    card.className = 'card w-full';
-    card.style.maxWidth = '400px';
-    
-    card.innerHTML = `
-      <h3 class="font-bold text-lg mb-4">${options.title}</h3>
-      <div class="mb-6">${options.content}</div>
-      <div class="flex justify-end gap-2">
-        <button class="btn btn-secondary btn-sm" id="btnModalCancel">Cancelar</button>
-        <button class="btn btn-primary btn-sm" id="btnModalConfirm">${options.confirmText || 'Aceptar'}</button>
+    container.innerHTML = `
+      <div class="modal-overlay"></div>
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">${options.title}</h3>
+          <button class="modal-close" id="modalCloseBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          ${options.content}
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary w-full" id="modalConfirmBtn">${options.confirmText || 'Aceptar'}</button>
+        </div>
       </div>
     `;
     
-    bg.appendChild(card);
-    container.appendChild(bg);
+    const close = () => container.innerHTML = '';
     
-    const close = () => bg.remove();
+    document.getElementById('modalCloseBtn').onclick = close;
+    document.querySelector('.modal-overlay').onclick = close;
     
-    document.getElementById('btnModalCancel').onclick = close;
-    document.getElementById('btnModalConfirm').onclick = async () => {
-      const btn = document.getElementById('btnModalConfirm');
-      const originalText = btn.textContent;
-      btn.textContent = 'Procesando...';
+    document.getElementById('modalConfirmBtn').onclick = async () => {
+      const btn = document.getElementById('modalConfirmBtn');
       btn.disabled = true;
+      btn.textContent = 'Procesando...';
       
       try {
         if (options.onConfirm) {
@@ -91,9 +101,9 @@ window.modal = {
         } else {
           close();
         }
-      } catch (e) {
-        btn.textContent = originalText;
+      } catch(e) {
         btn.disabled = false;
+        btn.textContent = options.confirmText || 'Aceptar';
       }
     };
   }

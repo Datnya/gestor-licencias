@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gestor-licencias-v1';
+const CACHE_NAME = 'gestor-licencias-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

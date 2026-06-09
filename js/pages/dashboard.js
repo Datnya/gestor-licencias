@@ -2,39 +2,46 @@
 window.dashboardPage = {
   render: async () => {
     return `
-      <div class="page-content pb-20">
-        <div class="mb-6">
-          <h2 class="font-bold text-xl mb-1">Resumen General</h2>
-          <p class="text-gray-500 text-sm">Estadísticas de tus licencias vendidas</p>
-        </div>
+      <div class="page-content">
+        <!-- CTA Button -->
+        <button class="cta-button mb-28" onclick="window.app.navigate('/new')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Generar Nueva Licencia
+        </button>
 
-        <div class="grid grid-cols-2 gap-4 mb-6">
-          <div class="card p-4">
-            <div class="stat-value text-primary" id="dashTotalActive">-</div>
+        <!-- Stats Section -->
+        <div class="section-header">
+          <h2 class="section-title">Resumen General</h2>
+        </div>
+        <p class="text-sm text-gray-500 mb-20">Estadísticas de tus licencias vendidas</p>
+        
+        <div class="stats-grid" id="dashStatsGrid">
+          <div class="stat-card-v2">
+            <div class="stat-icon-mini" style="background:var(--color-primary-100);color:var(--color-primary-600)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <div class="stat-number" id="dashTotalActive">-</div>
             <div class="stat-label">Licencias Activas</div>
           </div>
-          <div class="card p-4">
-            <div class="stat-value text-success" id="dashPendingPayments">-</div>
+          <div class="stat-card-v2">
+            <div class="stat-icon-mini" style="background:var(--color-warning-light);color:var(--color-warning)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div class="stat-number" id="dashPendingPayments">-</div>
             <div class="stat-label">Pagos Pendientes</div>
-          </div>
-          <div class="card p-4">
-            <div class="stat-value" id="dashPcCount">-</div>
-            <div class="stat-label">PC</div>
-          </div>
-          <div class="card p-4">
-            <div class="stat-value" id="dashMobileCount">-</div>
-            <div class="stat-label">Móviles</div>
           </div>
         </div>
 
-        <div class="mb-6">
-          <h3 class="font-semibold mb-3 flex items-center justify-between">
-            <span>Alertas y Recordatorios</span>
-            <span class="badge badge-warning" id="dashAlertCount">0</span>
-          </h3>
-          <div id="dashAlertsList" class="flex flex-col gap-3">
-            <div class="text-center text-sm text-gray-400 py-4">Cargando...</div>
-          </div>
+        <!-- Software breakdown -->
+        <div id="dashSoftwareBreakdown" class="mb-28"></div>
+
+        <!-- Alerts Section -->
+        <div class="section-header mb-16">
+          <h2 class="section-title">Alertas y Recordatorios</h2>
+          <span class="badge badge-warning" id="dashAlertCount" style="font-size:0.75rem;padding:4px 10px">0</span>
+        </div>
+        <div id="dashAlertsList">
+          <div class="text-center text-sm text-gray-400 py-4">Cargando...</div>
         </div>
       </div>
     `;
@@ -46,22 +53,35 @@ window.dashboardPage = {
       
       document.getElementById('dashTotalActive').textContent = stats.totalActive;
       document.getElementById('dashPendingPayments').textContent = stats.pendingCount;
-      document.getElementById('dashPcCount').textContent = stats.pcCount;
-      document.getElementById('dashMobileCount').textContent = stats.mobileCount;
       
+      // Software breakdown
+      const swContainer = document.getElementById('dashSoftwareBreakdown');
+      const entries = Object.entries(stats.softwareCounts);
+      if (entries.length > 0) {
+        let swHtml = '';
+        for (const [name, count] of entries) {
+          swHtml += `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--color-white);border-radius:var(--radius-md);border:1px solid var(--color-gray-100);margin-bottom:8px">
+              <span class="text-sm font-semibold" style="color:var(--color-gray-700)">${name}</span>
+              <span class="badge badge-primary" style="font-size:0.75rem">${count} licencia${count !== 1 ? 's' : ''}</span>
+            </div>
+          `;
+        }
+        swContainer.innerHTML = swHtml;
+      }
+
+      // Alerts
       const alertsContainer = document.getElementById('dashAlertsList');
       const alertsCount = document.getElementById('dashAlertCount');
-      
       let alertsHtml = '';
       let totalAlerts = 0;
       
-      // Check if there are no token
       if (!window.githubAPI.hasToken()) {
         alertsHtml += `
-          <div class="card p-4" style="border-left: 4px solid var(--color-danger)">
-            <div class="font-semibold text-danger">Falta Configuración</div>
-            <div class="text-sm text-gray-500 mt-1">Debes configurar tu Token de GitHub para empezar a crear licencias.</div>
-            <button class="btn btn-outline btn-sm mt-3" onclick="window.app.navigate('/settings')">Ir a Configuración</button>
+          <div class="alert-card overdue" style="flex-direction:column;align-items:flex-start;gap:8px">
+            <div class="font-semibold" style="color:var(--color-danger)">⚠ Falta Configuración</div>
+            <div class="text-sm text-gray-500">Debes configurar tu Token de GitHub en Ajustes para empezar.</div>
+            <button class="btn btn-outline btn-sm mt-8" style="width:auto" onclick="window.app.navigate('/settings')">Ir a Ajustes</button>
           </div>
         `;
         totalAlerts++;
@@ -69,17 +89,18 @@ window.dashboardPage = {
       
       // Pending Payments
       if (stats.pendingPayments && stats.pendingPayments.length > 0) {
-        for (const p of stats.pendingPayments.slice(0, 3)) { // Show max 3
+        for (const p of stats.pendingPayments.slice(0, 5)) {
           const client = await window.dbAPI.getClient(p.client_id);
           const isOverdue = new Date(p.due_date) < new Date();
           
           alertsHtml += `
-            <div class="card p-3 flex justify-between items-center" style="border-left: 4px solid var(--color-${isOverdue ? 'danger' : 'warning'})">
+            <div class="alert-card ${isOverdue ? 'overdue' : ''}">
               <div>
-                <div class="font-semibold text-sm">${client ? client.business_name : 'Cliente desconocido'}</div>
-                <div class="text-xs text-gray-500 mt-1">${p.concept} - Vence: ${window.format.date(p.due_date)}</div>
+                <div class="font-semibold text-sm">${client ? client.business_name : 'Desconocido'}</div>
+                <div class="text-xs text-gray-500 mt-4">${p.concept}</div>
+                <div class="text-xs ${isOverdue ? 'text-danger font-bold' : 'text-gray-400'} mt-4">Vence: ${window.format.date(p.due_date)}</div>
               </div>
-              <div class="font-bold text-sm">${window.format.currency(p.amount)}</div>
+              <div class="font-bold" style="font-size:0.95rem">${p.currency === 'USD' ? '$' : 'S/'}${parseFloat(p.amount).toFixed(2)}</div>
             </div>
           `;
           totalAlerts++;
@@ -88,12 +109,12 @@ window.dashboardPage = {
       
       if (totalAlerts === 0) {
         alertsHtml = `
-          <div class="card p-6 text-center text-gray-500 bg-success-light" style="border:1px solid var(--color-success)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-2" style="width:32px;height:32px;color:var(--color-success)">
+          <div class="alert-card ok" style="flex-direction:column;gap:8px;padding:28px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" style="width:36px;height:36px">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            <div class="font-medium text-success">¡Todo al día!</div>
-            <div class="text-sm mt-1">No tienes pagos pendientes ni licencias por renovar pronto.</div>
+            <div class="font-semibold" style="color:var(--color-success)">¡Todo al día!</div>
+            <div class="text-sm text-gray-500">No tienes pagos pendientes ni licencias por vencer.</div>
           </div>
         `;
       }
@@ -103,7 +124,7 @@ window.dashboardPage = {
       
     } catch (e) {
       console.error(e);
-      document.getElementById('dashAlertsList').innerHTML = `<div class="text-danger text-sm text-center py-4">Error cargando dashboard: ${e.message}</div>`;
+      document.getElementById('dashAlertsList').innerHTML = `<div class="text-danger text-sm text-center py-4">Error: ${e.message}</div>`;
     }
   }
 };

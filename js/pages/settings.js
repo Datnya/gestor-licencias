@@ -11,11 +11,6 @@ window.settingsPage = {
             Conexión a GitHub
           </h3>
           <div class="form-group">
-            <label class="form-label">Repositorio Destino</label>
-            <input type="text" class="form-input" value="Datnya/controlavander-a" disabled style="opacity: 0.7">
-            <div class="text-xs text-gray-500 mt-1">Las licencias se guardarán en este repositorio.</div>
-          </div>
-          <div class="form-group">
             <label class="form-label">Token de Acceso Personal (PAT)</label>
             <input type="password" id="inputGhToken" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
             <div class="text-xs text-warning mt-1">Este token se guarda únicamente en tu dispositivo local.</div>
