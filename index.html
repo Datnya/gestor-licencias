@@ -84,7 +84,17 @@
 
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+      window.addEventListener('load', async () => {
+        // Force clear old service workers and caches to load latest code
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          await reg.unregister();
+        }
+        const cacheNames = await caches.keys();
+        for (const name of cacheNames) {
+          await caches.delete(name);
+        }
+        // Now register the fresh SW
         navigator.serviceWorker.register('./sw.js').then(reg => {
           console.log('ServiceWorker registered:', reg.scope);
         }).catch(err => {

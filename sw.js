@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gestor-licencias-v2';
+const CACHE_NAME = 'gestor-licencias-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const ASSETS_TO_CACHE = [
   './js/pages/dashboard.js',
   './js/pages/clients.js',
   './js/pages/new-license.js',
+  './js/pages/projects.js',
   './js/pages/settings.js',
   './js/pages/client-detail.js',
   './js/app.js'

@@ -8,11 +8,18 @@ db.version(2).stores({
   software: '++id, name, repo_path, default_price, active'
 });
 
+db.version(3).stores({
+  clients: '++id, business_name, owner_name, phone, address, created_at',
+  licenses: '++id, client_id, software_id, code, type, device_code, status, purchase_date',
+  payments: '++id, client_id, license_id, software_id, concept, due_date, paid',
+  software: '++id, name, repo_path, default_price, maintenance_price, active'
+});
+
 // Initialize default software if empty
 db.on('populate', () => {
   db.software.bulkAdd([
-    { name: 'Control de Lavandería', repo_path: 'Datnya/controlavander-a', default_price: 200, active: 1 },
-    { name: 'Control de Estacionamiento', repo_path: 'Datnya/control-estacionamiento', default_price: 300, active: 1 }
+    { name: 'Control de Lavandería', repo_path: 'Datnya/controlavander-a', default_price: 200, maintenance_price: 15, active: 1 },
+    { name: 'Control de Estacionamiento', repo_path: 'Datnya/control-estacionamiento', default_price: 300, maintenance_price: 15, active: 1 }
   ]);
 });
 
@@ -66,7 +73,7 @@ window.dbAPI = {
     nextMonth.setDate(today.getDate() + 30);
     
     const maintenancePayments = await db.payments.filter(p => 
-      p.concept.includes('Mantenimiento') && 
+      p.concept && p.concept.includes('Mantenimiento') && 
       !p.paid && 
       new Date(p.due_date) <= nextMonth
     ).toArray();

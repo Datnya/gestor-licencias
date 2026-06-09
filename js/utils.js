@@ -62,7 +62,8 @@ window.toast = {
     }, 3000);
   },
   success: (title, msg) => window.toast.show(title, msg, 'success'),
-  error: (title, msg) => window.toast.show(title, msg, 'error')
+  error: (title, msg) => window.toast.show(title, msg, 'error'),
+  warning: (title, msg) => window.toast.show(title, msg, 'warning')
 };
 
 window.modal = {
