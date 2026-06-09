@@ -20,15 +20,29 @@ window.newLicensePage = {
 
           <!-- Paso 1 -->
           <div class="card wizard-step" id="step1" style="display:none">
-            <h3 class="font-semibold mb-4 text-center">Tipo de Licencia</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <button class="btn btn-outline flex flex-col items-center py-6 h-auto" onclick="window.newLicensePage.selectType('PC')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" class="mb-2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                <span>Computadora</span>
+            <h3 class="font-bold mb-4">¿Tipo de Licencia?</h3>
+            <div class="flex flex-col gap-4">
+              <button class="card p-4 text-left border-2 border-transparent" id="btnTypePC" onclick="window.newLicensePage.selectType('PC', this)">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                  </div>
+                  <div>
+                    <div class="font-bold">Computadora (Windows)</div>
+                    <div class="text-xs text-gray-500">Se genera código automático</div>
+                  </div>
+                </div>
               </button>
-              <button class="btn btn-outline flex flex-col items-center py-6 h-auto" onclick="window.newLicensePage.selectType('Móvil')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" class="mb-2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                <span>Celular</span>
+              <button class="card p-4 text-left border-2 border-transparent" id="btnTypeMobile" onclick="window.newLicensePage.selectType('Móvil', this)">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                  </div>
+                  <div>
+                    <div class="font-bold">Celular (Android)</div>
+                    <div class="text-xs text-gray-500">Requiere código del dispositivo</div>
+                  </div>
+                </div>
               </button>
             </div>
           </div>
@@ -56,16 +70,22 @@ window.newLicensePage = {
           </div>
           
           <!-- Paso 3 -->
-          <div class="card wizard-step" id="step3" style="display:none">
-            <h3 class="font-semibold mb-4 text-center">Código de Dispositivo</h3>
-            <div class="text-sm text-gray-500 mb-4 text-center" id="nlDeviceHelp">
-              Pídele al cliente el código que aparece en su pantalla de activación.
+          <div id="step3" style="display:none" class="animation-fade">
+            <h3 class="font-bold mb-4">Código del Dispositivo</h3>
+            <div id="deviceCodeInputContainer">
+              <p class="text-sm text-gray-500 mb-4">Ingresa el código que aparece en la pantalla del celular del cliente.</p>
+              <div class="form-group">
+                <input type="text" id="newLicenseDevice" class="form-input text-center text-xl tracking-widest font-mono" placeholder="DEV-XXXXXX" maxlength="10">
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Código de Dispositivo</label>
-              <input type="text" id="nlDevice" class="form-input text-center text-lg font-bold" placeholder="MOB-XXXXXXXXX" style="text-transform:uppercase">
+            <div id="deviceCodeAutoContainer" style="display:none">
+              <p class="text-sm text-gray-500 mb-4">La licencia para PC se genera de forma automática. No necesitas ingresar ningún código del dispositivo.</p>
+              <div class="p-4 bg-primary-50 text-primary-700 text-center rounded-lg font-mono mb-4 text-sm">Autogenerado al guardar</div>
             </div>
-            <button class="btn btn-primary mt-4" id="btnVerifyDevice" onclick="window.newLicensePage.verifyDevice()">Validar y Continuar</button>
+            
+            <div class="flex gap-3 mt-6">
+              <button class="btn btn-primary w-full" id="btnVerifyDevice" onclick="window.newLicensePage.verifyDevice()">Validar y Continuar</button>
+            </div>
           </div>
           
           <!-- Paso 4 -->
@@ -113,11 +133,13 @@ window.newLicensePage = {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="32"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
             <h3 class="font-bold text-2xl mb-2 text-success">¡Licencia Creada!</h3>
-            <p class="text-gray-500 mb-6">Dictale este código a tu cliente para que active su aplicación.</p>
+            <p class="text-gray-500 mb-6" id="lblSuccessMsg">Dictale este código a tu cliente para que active su aplicación.</p>
             
-            <div class="bg-gray-100 rounded-xl p-6 border-2 border-dashed border-gray-300 mb-6 relative">
+            <div class="bg-gray-100 rounded-xl p-6 border-2 border-dashed border-gray-300 mb-4 relative">
               <div class="text-3xl font-bold font-mono text-gray-900" id="nlResultCode" style="letter-spacing:2px">LAV-XXXX-XXXX</div>
             </div>
+            
+            <button class="btn btn-outline w-full mb-6" id="btnCopyCode" onclick="window.newLicensePage.copyCode()">Copiar Código</button>
             
             <button class="btn btn-primary w-full" onclick="window.app.navigate('/clients')">Ir a Mis Clientes</button>
           </div>
@@ -161,15 +183,22 @@ window.newLicensePage = {
     }
   },
 
-  selectType: (type) => {
+  selectType: (type, el) => {
     window.newLicensePage.state.type = type;
-    const isMobile = type === 'Móvil';
+    document.querySelectorAll('#step1 button').forEach(b => b.classList.remove('border-primary-500', 'bg-primary-50'));
+    el.classList.add('border-primary-500', 'bg-primary-50');
     
-    document.getElementById('nlDevice').placeholder = isMobile ? 'Ej: MOB-ABC123XYZ' : 'Ej: E2A4C9F1...';
-    document.getElementById('nlDeviceHelp').textContent = isMobile 
-      ? 'Pídele al cliente el código MOB-XXXXXXXX que aparece en su pantalla.'
-      : 'Pídele al cliente el Hash de Dispositivo de su computadora.';
-      
+    // Configurar vista del Step 3 basado en el tipo
+    const inputContainer = document.getElementById('deviceCodeInputContainer');
+    const autoContainer = document.getElementById('deviceCodeAutoContainer');
+    
+    if (type === 'PC') {
+      inputContainer.style.display = 'none';
+      autoContainer.style.display = 'block';
+    } else {
+      inputContainer.style.display = 'block';
+      autoContainer.style.display = 'none';
+    }
     window.newLicensePage.nextStep(2);
   },
   
@@ -216,13 +245,16 @@ window.newLicensePage = {
       };
     }
     
-    document.querySelectorAll('.wizard-step').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.wizard-step, #step3').forEach(el => el.style.display = 'none');
     document.getElementById(`step${step}`).style.display = 'block';
   },
   
   verifyDevice: async () => {
-    const code = document.getElementById('nlDevice').value.trim().toUpperCase();
-    if (!code) {
+    let deviceCode = document.getElementById('newLicenseDevice').value.trim().toUpperCase();
+    
+    if (window.newLicensePage.state.type === 'PC') {
+      deviceCode = 'PC-AUTO';
+    } else if (!deviceCode) {
       window.toast.error('Error', 'Ingresa el código del dispositivo');
       return;
     }
@@ -233,7 +265,7 @@ window.newLicensePage = {
     
     try {
       const sw = window.newLicensePage.state.software;
-      const isUsed = await window.githubAPI.isDeviceUsed(sw.repo_path, code);
+      const isUsed = window.newLicensePage.state.type !== 'PC' && await window.githubAPI.isDeviceUsed(sw.repo_path, deviceCode);
       if (isUsed) {
         window.toast.error('Error', 'Este dispositivo ya está vinculado a otra licencia en este repositorio.');
         btn.textContent = 'Validar y Continuar';
@@ -241,7 +273,7 @@ window.newLicensePage = {
         return;
       }
       
-      window.newLicensePage.state.deviceCode = code;
+      window.newLicensePage.state.deviceCode = deviceCode;
       window.newLicensePage.nextStep(4);
     } catch (e) {
       window.toast.error('Error de Conexión', e.message);
@@ -327,6 +359,13 @@ window.newLicensePage = {
       });
       
       document.getElementById('nlResultCode').textContent = licenseCode;
+      if (s.type === 'PC') {
+        document.getElementById('lblSuccessMsg').textContent = 'Copia este código autogenerado y pásaselo a tu cliente para que active su programa en Windows.';
+        document.getElementById('btnCopyCode').style.display = 'block';
+      } else {
+        document.getElementById('lblSuccessMsg').textContent = 'Dictale este código a tu cliente para que active su aplicación.';
+        document.getElementById('btnCopyCode').style.display = 'block';
+      }
       window.newLicensePage.nextStep(5);
       
     } catch (e) {
@@ -334,5 +373,11 @@ window.newLicensePage = {
       btn.textContent = 'Finalizar y Crear Licencia';
       btn.disabled = false;
     }
+  },
+  
+  copyCode: () => {
+    const code = document.getElementById('nlResultCode').textContent;
+    navigator.clipboard.writeText(code);
+    window.toast.success('Copiado', 'Código copiado al portapapeles');
   }
 };

@@ -5,7 +5,7 @@ window.projectsPage = {
       <div class="page-content">
         <div class="section-header mb-24">
           <h2 class="section-title">Mis Proyectos</h2>
-          <button class="btn btn-outline btn-sm" style="width:auto;font-size:0.78rem" onclick="window.settingsPage.showAddSoftware(); window.projectsPage._pendingReload = true;">+ Nuevo</button>
+          <button class="btn btn-outline btn-sm" style="width:auto;font-size:0.78rem" onclick="window.projectsPage.showAddSoftware(); window.projectsPage._pendingReload = true;">+ Nuevo</button>
         </div>
         <p class="text-sm text-gray-500 mb-24">Toca un proyecto para ver sus detalles y editar sus precios.</p>
 
@@ -63,52 +63,132 @@ window.projectsPage = {
     
     const licenses = await db.licenses.where('software_id').equals(swId).toArray();
     const activeCount = licenses.filter(l => l.status === 'active').length;
-    const pcCount = licenses.filter(l => l.type === 'PC').length;
-    const mobileCount = licenses.filter(l => l.type === 'Móvil').length;
+    
+    // Fetch last updated from GitHub if token exists
+    let lastUpdated = 'Desconocido';
+    try {
+      const token = window.githubAPI.getToken();
+      if (token && sw.repo_path) {
+        const response = await fetch(`https://api.github.com/repos/${sw.repo_path}/commits?per_page=1`, {
+          headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        if (response.ok) {
+          const commits = await response.json();
+          if (commits.length > 0) {
+            lastUpdated = window.format.date(commits[0].commit.committer.date);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not fetch last commit", e);
+    }
 
     window.modal.show({
-      title: sw.name,
+      title: 'Detalles del Proyecto',
       content: `
-        <div class="mb-20">
-          <div style="display:flex;gap:12px;margin-bottom:16px">
-            <div style="flex:1;background:var(--color-gray-50);padding:12px;border-radius:var(--radius-md);text-align:center">
-              <div class="font-bold text-lg">${activeCount}</div>
-              <div class="text-xs text-gray-500">Clientes</div>
-            </div>
-            <div style="flex:1;background:var(--color-gray-50);padding:12px;border-radius:var(--radius-md);text-align:center">
-              <div class="font-bold text-lg">${pcCount}</div>
-              <div class="text-xs text-gray-500">PC</div>
-            </div>
-            <div style="flex:1;background:var(--color-gray-50);padding:12px;border-radius:var(--radius-md);text-align:center">
-              <div class="font-bold text-lg">${mobileCount}</div>
-              <div class="text-xs text-gray-500">Móvil</div>
-            </div>
+        <div class="form-group">
+          <label class="form-label text-sm">Nombre del Software</label>
+          <input type="text" id="editSwName" class="form-input font-bold" value="${sw.name}">
+        </div>
+        <div class="form-group">
+          <label class="form-label text-sm">Repositorio GitHub</label>
+          <input type="text" id="editSwRepo" class="form-input text-sm text-gray-600" value="${sw.repo_path}">
+        </div>
+        
+        <div class="flex gap-4 mb-4">
+          <div class="flex-1 form-group">
+            <label class="form-label text-sm">Costo Descarga (S/)</label>
+            <input type="number" id="editSwPrice" class="form-input font-bold text-primary-600" value="${sw.default_price}">
+          </div>
+          <div class="flex-1 form-group">
+            <label class="form-label text-sm">Mantenimiento (USD)</label>
+            <input type="number" id="editSwMaintenance" class="form-input font-bold text-warning" value="${sw.maintenance_price || 15}">
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Precio de Instalación (S/)</label>
-          <input type="number" id="editSwPrice" class="form-input" value="${sw.default_price}">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Mantenimiento Anual (USD)</label>
-          <input type="number" id="editSwMaintenance" class="form-input" value="${sw.maintenance_price || 15}">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Repositorio GitHub</label>
-          <input type="text" class="form-input" value="${sw.repo_path}" disabled style="opacity:0.6">
+        
+        <div class="p-3 bg-gray-50 rounded-lg text-sm text-gray-600 mb-4">
+          <div class="flex justify-between mb-1">
+            <span>Clientes con instalación:</span>
+            <span class="font-bold text-gray-900">${activeCount}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Última actualización:</span>
+            <span class="font-bold text-gray-900">${lastUpdated}</span>
+          </div>
         </div>
       `,
       confirmText: 'Guardar Cambios',
       onConfirm: async () => {
+        const newName = document.getElementById('editSwName').value.trim();
+        const newRepo = document.getElementById('editSwRepo').value.trim();
         const newPrice = parseFloat(document.getElementById('editSwPrice').value) || 0;
         const newMaintenance = parseFloat(document.getElementById('editSwMaintenance').value) || 15;
         
+        if (!newName || !newRepo) {
+          window.toast.error('Error', 'Nombre y repositorio son obligatorios');
+          return true;
+        }
+        
+        sw.name = newName;
+        sw.repo_path = newRepo;
         sw.default_price = newPrice;
         sw.maintenance_price = newMaintenance;
         await window.dbAPI.saveSoftware(sw);
         
         await window.projectsPage.loadProjects();
-        window.toast.success('Actualizado', 'Los precios han sido guardados.');
+        window.toast.success('Actualizado', 'Proyecto guardado correctamente.');
+      }
+    });
+  },
+  
+  showAddSoftware: () => {
+    window.modal.show({
+      title: 'Nuevo Proyecto',
+      content: `
+        <div class="form-group">
+          <label class="form-label text-sm">Nombre del Software</label>
+          <input type="text" id="addSwName" class="form-input" placeholder="Ej: Control de Inventario">
+        </div>
+        <div class="form-group">
+          <label class="form-label text-sm">Repositorio GitHub</label>
+          <input type="text" id="addSwRepo" class="form-input" placeholder="Usuario/Repositorio">
+        </div>
+        <div class="flex gap-4 mb-2">
+          <div class="flex-1 form-group">
+            <label class="form-label text-sm">Costo Descarga (S/)</label>
+            <input type="number" id="addSwPrice" class="form-input" value="200">
+          </div>
+          <div class="flex-1 form-group">
+            <label class="form-label text-sm">Mantenimiento (USD)</label>
+            <input type="number" id="addSwMaintenance" class="form-input" value="15">
+          </div>
+        </div>
+      `,
+      confirmText: 'Crear Proyecto',
+      onConfirm: async () => {
+        const name = document.getElementById('addSwName').value.trim();
+        const repo = document.getElementById('addSwRepo').value.trim();
+        const price = parseFloat(document.getElementById('addSwPrice').value) || 0;
+        const maintenance = parseFloat(document.getElementById('addSwMaintenance').value) || 15;
+        
+        if (!name || !repo) {
+          window.toast.error('Error', 'Nombre y repositorio son obligatorios');
+          return true; // Keep open
+        }
+        
+        await db.software.add({
+          name: name,
+          repo_path: repo,
+          default_price: price,
+          maintenance_price: maintenance,
+          active: 1
+        });
+        
+        await window.projectsPage.loadProjects();
+        window.toast.success('Proyecto creado', 'El software ha sido agregado a tu catálogo.');
       }
     });
   }

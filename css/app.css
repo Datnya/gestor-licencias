@@ -10,7 +10,7 @@
 
 /* ===== HEADER ===== */
 .header {
-  height: 140px;
+  height: 80px;
   background-color: var(--color-black);
   position: fixed;
   top: 0;
@@ -32,11 +32,15 @@
 .header-logo {
   display: flex;
   align-items: center;
+  height: 80px;
 }
 
 .header-logo img {
-  height: 120px;
+  height: 80px;
   object-fit: contain;
+  transform: scale(2.2);
+  transform-origin: left center;
+  mix-blend-mode: screen;
 }
 
 .status-indicator {
@@ -75,7 +79,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-top: 140px;  /* header height */
+  padding-top: 80px;  /* header height */
   padding-bottom: 80px; /* nav height */
   background-color: var(--color-gray-50);
 }
