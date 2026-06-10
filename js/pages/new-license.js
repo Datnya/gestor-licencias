@@ -23,8 +23,8 @@ window.newLicensePage = {
             <h3 class="font-bold mb-4">¿Tipo de Licencia?</h3>
             <div class="flex flex-col gap-4">
               <button class="card p-4 text-left border-2 border-transparent" id="btnTypePC" onclick="window.newLicensePage.selectType('PC', this)">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center">
+                <div class="flex items-center gap-4">
+                  <div class="icon-box">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                   </div>
                   <div>
@@ -34,8 +34,8 @@ window.newLicensePage = {
                 </div>
               </button>
               <button class="card p-4 text-left border-2 border-transparent" id="btnTypeMobile" onclick="window.newLicensePage.selectType('Móvil', this)">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center">
+                <div class="flex items-center gap-4">
+                  <div class="icon-box">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                   </div>
                   <div>
