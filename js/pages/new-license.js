@@ -95,31 +95,39 @@ window.newLicensePage = {
             
             <div class="form-group">
               <label class="form-label">Monto Total de Venta (S/)</label>
-              <input type="number" id="nlPrice" class="form-input" value="200" onchange="window.newLicensePage.updatePrices()">
+              <input type="number" id="nlPrice" class="form-input" value="200" oninput="window.newLicensePage.updatePrices()">
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Mantenimiento Anual (USD)</label>
-              <input type="number" id="nlMaintenance" class="form-input" value="15">
+            <div class="flex gap-4">
+              <div class="form-group flex-1">
+                <label class="form-label">Mantenimiento Anual (USD)</label>
+                <input type="number" id="nlMaintenance" class="form-input" value="15" oninput="window.newLicensePage.updateMaintenance('USD')">
+              </div>
+              <div class="form-group flex-1">
+                <label class="form-label">Mantenimiento Anual (S/)</label>
+                <input type="number" id="nlMaintenancePEN" class="form-input" value="57.00" oninput="window.newLicensePage.updateMaintenance('PEN')">
+              </div>
             </div>
 
             <label class="form-label mt-6 mb-2">Forma de Pago</label>
             <div class="flex flex-col gap-3">
-              <label class="card p-4 m-0 border border-primary-500 bg-primary-50 flex items-center gap-3 cursor-pointer" id="optPagoTotal" onclick="window.newLicensePage.selectPayment('total')">
-                <input type="radio" name="payPlan" value="total" checked class="w-5 h-5 accent-primary-600">
+              <label class="card p-4 m-0 border border-primary-500 bg-primary-50 flex items-center cursor-pointer" id="optPagoTotal" onclick="window.newLicensePage.selectPayment('total')">
+                <div style="margin-right: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <input type="radio" name="payPlan" value="total" checked style="width: 20px; height: 20px; accent-color: var(--color-primary-600);">
+                </div>
                 <div class="flex-1">
                   <div class="font-bold">Pago Único</div>
                   <div class="text-sm text-gray-600" id="lblTotalAmount">S/ 200.00 ahora</div>
                 </div>
               </label>
               
-              <label class="card p-4 m-0 border border-gray-200 cursor-pointer" id="optPagoCuotas" onclick="window.newLicensePage.selectPayment('cuotas')">
-                <div class="flex items-center gap-3">
-                  <input type="radio" name="payPlan" value="cuotas" class="w-5 h-5 accent-primary-600">
-                  <div class="flex-1">
-                    <div class="font-bold">2 Cuotas</div>
-                    <div class="text-sm text-gray-600" id="lblCuotasAmount">S/ 100 ahora y S/ 100 en 1 mes</div>
-                  </div>
+              <label class="card p-4 m-0 border border-gray-200 flex items-center cursor-pointer" id="optPagoCuotas" onclick="window.newLicensePage.selectPayment('cuotas')">
+                <div style="margin-right: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <input type="radio" name="payPlan" value="cuotas" style="width: 20px; height: 20px; accent-color: var(--color-primary-600);">
+                </div>
+                <div class="flex-1">
+                  <div class="font-bold">2 Cuotas</div>
+                  <div class="text-sm text-gray-600" id="lblCuotasAmount">S/ 100 ahora y S/ 100 en 1 mes</div>
                 </div>
               </label>
             </div>
@@ -135,13 +143,14 @@ window.newLicensePage = {
             <h3 class="font-bold text-2xl mb-2 text-success">¡Licencia Creada!</h3>
             <p class="text-gray-500 mb-6" id="lblSuccessMsg">Dictale este código a tu cliente para que active su aplicación.</p>
             
-            <div class="bg-gray-100 rounded-xl p-6 border-2 border-dashed border-gray-300 mb-4 relative">
+            <div class="bg-gray-100 rounded-xl p-6 border-2 border-dashed border-gray-300 mb-8 mt-6 relative">
               <div class="text-3xl font-bold font-mono text-gray-900" id="nlResultCode" style="letter-spacing:2px">LAV-XXXX-XXXX</div>
             </div>
             
-            <button class="btn btn-outline w-full mb-6" id="btnCopyCode" onclick="window.newLicensePage.copyCode()">Copiar Código</button>
-            
-            <button class="btn btn-primary w-full" onclick="window.app.navigate('/clients')">Ir a Mis Clientes</button>
+            <div class="mt-8 flex flex-col gap-4">
+              <button class="btn btn-outline w-full" id="btnCopyCode" onclick="window.newLicensePage.copyCode()">Copiar Código</button>
+              <button class="btn btn-primary w-full" onclick="window.app.navigate('/clients')">Ir a Mis Clientes</button>
+            </div>
           </div>
         </div>
       </div>
@@ -204,8 +213,8 @@ window.newLicensePage = {
   
   selectPayment: (plan) => {
     window.newLicensePage.state.paymentPlan = plan;
-    document.getElementById('optPagoTotal').className = 'card p-4 m-0 border cursor-pointer flex items-center gap-3 ' + (plan==='total' ? 'border-primary-500 bg-primary-50' : 'border-gray-200');
-    document.getElementById('optPagoCuotas').className = 'card p-4 m-0 border cursor-pointer ' + (plan==='cuotas' ? 'border-primary-500 bg-primary-50' : 'border-gray-200');
+    document.getElementById('optPagoTotal').className = 'card p-4 m-0 border flex items-center cursor-pointer ' + (plan==='total' ? 'border-primary-500 bg-primary-50' : 'border-gray-200');
+    document.getElementById('optPagoCuotas').className = 'card p-4 m-0 border flex items-center cursor-pointer ' + (plan==='cuotas' ? 'border-primary-500 bg-primary-50' : 'border-gray-200');
   },
 
   updatePrices: () => {
@@ -215,6 +224,17 @@ window.newLicensePage = {
     const half = (val / 2).toFixed(2);
     document.getElementById('lblTotalAmount').textContent = `S/ ${val.toFixed(2)} ahora`;
     document.getElementById('lblCuotasAmount').textContent = `S/ ${half} ahora y S/ ${half} en 1 mes`;
+  },
+
+  updateMaintenance: (source) => {
+    const exchangeRate = 3.8; // Fixed conversion rate
+    if (source === 'USD') {
+      const usd = parseFloat(document.getElementById('nlMaintenance').value) || 0;
+      document.getElementById('nlMaintenancePEN').value = (usd * exchangeRate).toFixed(2);
+    } else {
+      const pen = parseFloat(document.getElementById('nlMaintenancePEN').value) || 0;
+      document.getElementById('nlMaintenance').value = (pen / exchangeRate).toFixed(2);
+    }
   },
 
   nextStep: async (step) => {
