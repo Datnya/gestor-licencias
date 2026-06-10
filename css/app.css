@@ -499,7 +499,9 @@
 }
 
 .loading-logo {
-  height: 180px;
+  width: 80%;
+  max-width: 250px;
+  height: auto;
   margin-bottom: 30px;
   animation: pulseLogo 2.5s infinite;
 }
