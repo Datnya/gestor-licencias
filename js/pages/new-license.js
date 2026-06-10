@@ -75,7 +75,7 @@ window.newLicensePage = {
             <div id="deviceCodeInputContainer">
               <p class="text-sm text-gray-500 mb-4">Ingresa el código que aparece en la pantalla del celular del cliente.</p>
               <div class="form-group">
-                <input type="text" id="newLicenseDevice" class="form-input text-center text-xl tracking-widest font-mono" placeholder="DEV-XXXXXX" maxlength="10">
+                <input type="text" id="newLicenseDevice" class="form-input text-center text-xl tracking-widest font-mono" placeholder="DEV-XXXXXX" maxlength="20">
               </div>
             </div>
             <div id="deviceCodeAutoContainer" style="display:none">

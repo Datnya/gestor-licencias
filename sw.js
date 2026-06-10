@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gestor-licencias-v4';
+const CACHE_NAME = 'gestor-licencias-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,6 +7,8 @@ const ASSETS_TO_CACHE = [
   './css/base.css',
   './css/components.css',
   './css/app.css',
+  './assets/logo.png',
+  './assets/logo_app.png',
   'https://unpkg.com/dexie@3.2.4/dist/dexie.js',
   './js/utils.js',
   './js/db.js',
