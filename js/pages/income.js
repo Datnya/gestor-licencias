@@ -36,7 +36,7 @@ window.incomePage = {
             '<option value="Pago Único">Pago Único</option>' +
           '</select>' +
         '</div>' +
-        '<button class="btn btn-primary" onclick="window.incomePage.exportCSV()">' +
+        '<button class="btn btn-primary" style="margin-top:20px;margin-bottom:10px" onclick="window.incomePage.exportCSV()">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" style="display:inline;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>' +
           'Descargar Excel' +
         '</button>' +
@@ -101,19 +101,23 @@ window.incomePage = {
       });
 
       // Calculate totals
-      var totalPEN = 0;
-      var totalUSD = 0;
+      var rawTotalPEN = 0;
+      var rawTotalUSD = 0;
       for (var i = 0; i < payments.length; i++) {
         var p = payments[i];
         var amt = parseFloat(p.amount) || 0;
-        if (p.currency === 'USD') totalUSD += amt;
-        else totalPEN += amt;
+        if (p.currency === 'USD') rawTotalUSD += amt;
+        else rawTotalPEN += amt;
       }
+
+      var exchangeRate = 3.8;
+      var unifiedTotalPEN = rawTotalPEN + (rawTotalUSD * exchangeRate);
+      var unifiedTotalUSD = rawTotalUSD + (rawTotalPEN / exchangeRate);
 
       var elPEN = document.getElementById('incomeTotalPEN');
       var elUSD = document.getElementById('incomeTotalUSD');
-      if (elPEN) elPEN.textContent = 'S/ ' + totalPEN.toFixed(2);
-      if (elUSD) elUSD.textContent = '$ ' + totalUSD.toFixed(2);
+      if (elPEN) elPEN.textContent = 'S/ ' + unifiedTotalPEN.toFixed(2);
+      if (elUSD) elUSD.textContent = '$ ' + unifiedTotalUSD.toFixed(2);
 
       if (payments.length === 0) {
         listContainer.innerHTML = '<div class="p-6 text-center text-gray-500">No hay ingresos registrados.</div>';

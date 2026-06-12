@@ -138,12 +138,11 @@ window.clientsPage = {
             <div style="font-weight:700;color:var(--color-gray-900);font-size:0.95rem">${c.business_name}</div>
             <div style="font-size:0.8rem;color:var(--color-gray-500)">${c.owner_name || ''}</div>
             <div style="font-size:0.75rem;color:var(--color-gray-400)">Suscrito: ${window.format.date(c.created_at)}</div>
-            <div style="margin-top:3px">
-              ${swNames.map(n => `<span style="display:inline-block;background:var(--color-primary);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 10px;border-radius:6px;margin-right:4px">${n}</span>`).join('')}
+            <div style="margin-top:4px">
+              ${swNames.map(n => `<span style="display:inline-block;color:#f97316;font-size:0.8rem;font-weight:800;margin-right:4px">${n}</span>`).join('')}
             </div>
-            ${hasPending ? '<div style="font-size:0.72rem;color:var(--color-warning);font-weight:600;margin-top:2px">⚠ Pago pendiente</div>' : ''}
-            <div style="text-align:center;margin-top:6px">
-              <button class="btn btn-primary" style="padding:5px 20px;font-size:0.75rem;border-radius:8px" onclick="event.stopPropagation(); window.app.navigate('/client/${c.id}')">Ver detalles</button>
+            <div style="text-align:center;margin-top:12px">
+              <button class="btn btn-primary" style="padding:8px 30px;font-size:0.85rem;border-radius:8px;width:100%" onclick="event.stopPropagation(); window.app.navigate('/client/${c.id}')">Ver detalles</button>
             </div>
           </div>
         `;
