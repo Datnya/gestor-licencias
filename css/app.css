@@ -109,12 +109,17 @@
   background: var(--color-white);
   height: 72px;
   display: flex;
-  justify-content: space-around;
   align-items: center;
   box-shadow: 0 -3px 16px rgba(0,0,0,0.08);
   z-index: 50;
   padding-bottom: env(safe-area-inset-bottom, 0);
   border-top: 1px solid var(--color-gray-100);
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+}
+.bottom-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-item {
@@ -126,10 +131,11 @@
   gap: 5px;
   font-size: 0.68rem;
   font-weight: 600;
-  flex: 1;
+  flex: 0 0 25%;
   height: 100%;
   text-decoration: none;
   transition: color var(--transition-fast);
+  scroll-snap-align: start;
 }
 
 .nav-item svg {

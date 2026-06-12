@@ -114,6 +114,11 @@ window.app = {
         mainContent.appendChild(pageEl);
         if (window.clientDetailPage.init) await window.clientDetailPage.init(id);
       }
+      else if (route === '/income') {
+        pageEl.innerHTML = await window.incomePage.render();
+        mainContent.appendChild(pageEl);
+        if (window.incomePage.init) await window.incomePage.init();
+      }
       else if (route === '/settings') {
         pageEl.innerHTML = await window.settingsPage.render();
         mainContent.appendChild(pageEl);

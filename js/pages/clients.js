@@ -141,7 +141,8 @@ window.clientsPage = {
               </div>
               <div>
                 <div class="font-semibold" style="color:var(--color-gray-900);font-size:0.95rem">${c.business_name}</div>
-                <div class="text-xs text-gray-500 mt-4">${c.owner_name || ''}</div>
+                <div class="text-xs text-gray-500 mt-2">${c.owner_name || ''}</div>
+                <div class="text-xs text-gray-400 mt-1">Suscrito: ${window.format.date(c.created_at)}</div>
                 <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
                   ${swNames.map(n => `<span class="badge badge-primary" style="font-size:0.65rem;padding:2px 6px">${n}</span>`).join('')}
                 </div>
