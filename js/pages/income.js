@@ -3,70 +3,64 @@ window.incomePage = {
   currentFilterType: 'all',
   currentFilterMonth: '',
 
-  render: async () => {
+  render: async function() {
     // Generar opciones de meses únicos
-    const payments = await db.payments.toArray();
-    const months = new Set();
-    payments.forEach(p => {
+    var payments = await db.payments.toArray();
+    var months = new Set();
+    payments.forEach(function(p) {
       if (p.paid && p.paid_date) {
-        months.add(p.paid_date.substring(0, 7)); // YYYY-MM
+        months.add(p.paid_date.substring(0, 7));
       }
     });
-    const monthsArr = Array.from(months).sort().reverse();
-    const monthOptions = monthsArr.map(m => `<option value="${m}">${m}</option>`).join('');
+    var monthsArr = Array.from(months).sort().reverse();
+    var monthOptions = monthsArr.map(function(m) {
+      return '<option value="' + m + '">' + m + '</option>';
+    }).join('');
 
-    return `
-      <div class="page-content pb-20">
-        <div class="section-header mb-16">
-          <h2 class="section-title">Ingresos Totales</h2>
-          <button class="btn btn-outline btn-sm text-danger" style="width:auto" onclick="window.incomePage.clearAll()">Vaciar Registro</button>
-        </div>
+    return '<div class="page-content pb-20">' +
+      '<div class="section-header mb-16">' +
+        '<h2 class="section-title">Ingresos Totales</h2>' +
+        '<button class="btn btn-outline btn-sm text-danger" style="width:auto" onclick="window.incomePage.clearAll()">Vaciar Registro</button>' +
+      '</div>' +
 
-        <!-- Filters -->
-        <div class="flex flex-col gap-3 mb-16">
-          <div class="flex gap-2">
-            <select id="incomeMonthFilter" class="form-select flex-1" onchange="window.incomePage.applyFilters()">
-              <option value="">Todos los meses</option>
-              ${monthOptions}
-            </select>
-            <select id="incomeTypeFilter" class="form-select flex-1" onchange="window.incomePage.applyFilters()">
-              <option value="all">Cualquier concepto</option>
-              <option value="Mantenimiento">Mantenimiento</option>
-              <option value="Adelanto">Instalación (Adelanto)</option>
-              <option value="Pago Único">Pago Único</option>
-            </select>
-          </div>
-          <button class="btn btn-primary" onclick="window.incomePage.exportCSV()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" style="display:inline;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            Descargar Excel
-          </button>
-        </div>
-        
-        <!-- Summary Cards -->
-        <div class="stats-grid">
-          <div class="stat-card-v2 bg-success-50 border-success-200">
-            <div class="stat-label text-success-700">Total Soles (S/)</div>
-            <div class="stat-number text-success-800" id="incomeTotalPEN" style="font-size:1.4rem">S/ 0.00</div>
-          </div>
-          <div class="stat-card-v2 bg-success-50 border-success-200">
-            <div class="stat-label text-success-700">Total Dólares ($)</div>
-            <div class="stat-number text-success-800" id="incomeTotalUSD" style="font-size:1.4rem">$ 0.00</div>
-          </div>
-        </div>
+      '<div class="flex flex-col gap-3 mb-16">' +
+        '<div class="flex gap-2">' +
+          '<select id="incomeMonthFilter" class="form-select flex-1" onchange="window.incomePage.applyFilters()">' +
+            '<option value="">Todos los meses</option>' +
+            monthOptions +
+          '</select>' +
+          '<select id="incomeTypeFilter" class="form-select flex-1" onchange="window.incomePage.applyFilters()">' +
+            '<option value="all">Cualquier concepto</option>' +
+            '<option value="Mantenimiento">Mantenimiento</option>' +
+            '<option value="Adelanto">Instalación (Adelanto)</option>' +
+            '<option value="Pago Único">Pago Único</option>' +
+          '</select>' +
+        '</div>' +
+        '<button class="btn btn-primary" onclick="window.incomePage.exportCSV()">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" style="display:inline;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>' +
+          'Descargar Excel' +
+        '</button>' +
+      '</div>' +
 
-        <div id="incomeList" class="card p-0 overflow-hidden mt-16">
-          <div class="p-6 text-center text-gray-500">Cargando ingresos...</div>
-        </div>
-        
-        <!-- Contenedor oculto para renderizar el recibo antes de convertirlo a imagen -->
-        <div id="receiptRenderContainer" style="position: absolute; left: -9999px; top: 0;"></div>
-      </div>
-    `;
+      '<div class="stats-grid">' +
+        '<div class="stat-card-v2 bg-success-50 border-success-200">' +
+          '<div class="stat-label text-success-700">Total Soles (S/)</div>' +
+          '<div class="stat-number text-success-800" id="incomeTotalPEN" style="font-size:1.4rem">S/ 0.00</div>' +
+        '</div>' +
+        '<div class="stat-card-v2 bg-success-50 border-success-200">' +
+          '<div class="stat-label text-success-700">Total Dólares ($)</div>' +
+          '<div class="stat-number text-success-800" id="incomeTotalUSD" style="font-size:1.4rem">$ 0.00</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div id="incomeList" class="card p-0 overflow-hidden mt-16">' +
+        '<div class="p-6 text-center text-gray-500">Cargando ingresos...</div>' +
+      '</div>' +
+    '</div>';
   },
 
-  init: async () => {
-    // Set default month to current month if options exist
-    const monthSelect = document.getElementById('incomeMonthFilter');
+  init: async function() {
+    var monthSelect = document.getElementById('incomeMonthFilter');
     if (monthSelect && monthSelect.options.length > 1 && !window.incomePage.currentFilterMonth) {
       window.incomePage.currentFilterMonth = monthSelect.options[1].value;
       monthSelect.value = window.incomePage.currentFilterMonth;
@@ -74,143 +68,165 @@ window.incomePage = {
     await window.incomePage.loadData();
   },
 
-  applyFilters: () => {
+  applyFilters: function() {
     window.incomePage.currentFilterMonth = document.getElementById('incomeMonthFilter').value;
     window.incomePage.currentFilterType = document.getElementById('incomeTypeFilter').value;
     window.incomePage.loadData();
   },
 
-  loadData: async () => {
-    const listContainer = document.getElementById('incomeList');
+  loadData: async function() {
+    var listContainer = document.getElementById('incomeList');
     try {
-      let payments = await db.payments.where('paid').equals(true).toArray();
-      
+      var payments = await db.payments.where('paid').equals(true).toArray();
+
       // Filter by month
       if (window.incomePage.currentFilterMonth) {
-        payments = payments.filter(p => p.paid_date && p.paid_date.startsWith(window.incomePage.currentFilterMonth));
+        payments = payments.filter(function(p) {
+          return p.paid_date && p.paid_date.startsWith(window.incomePage.currentFilterMonth);
+        });
       }
-      
+
       // Filter by type
       if (window.incomePage.currentFilterType !== 'all') {
-        payments = payments.filter(p => p.concept.includes(window.incomePage.currentFilterType));
+        var filterType = window.incomePage.currentFilterType;
+        payments = payments.filter(function(p) {
+          return p.concept && p.concept.indexOf(filterType) !== -1;
+        });
       }
-      
+
       // Sort newest first
-      payments.sort((a,b) => new Date(b.paid_date) - new Date(a.paid_date));
+      payments.sort(function(a, b) {
+        return new Date(b.paid_date) - new Date(a.paid_date);
+      });
 
       // Calculate totals
-      let totalPEN = 0;
-      let totalUSD = 0;
-      for (const p of payments) {
+      var totalPEN = 0;
+      var totalUSD = 0;
+      for (var i = 0; i < payments.length; i++) {
+        var p = payments[i];
         if (p.currency === 'USD') totalUSD += parseFloat(p.amount);
         else totalPEN += parseFloat(p.amount);
       }
-      
-      const elPEN = document.getElementById('incomeTotalPEN');
-      const elUSD = document.getElementById('incomeTotalUSD');
-      if(elPEN) elPEN.textContent = \`S/ \${totalPEN.toFixed(2)}\`;
-      if(elUSD) elUSD.textContent = \`$ \${totalUSD.toFixed(2)}\`;
+
+      var elPEN = document.getElementById('incomeTotalPEN');
+      var elUSD = document.getElementById('incomeTotalUSD');
+      if (elPEN) elPEN.textContent = 'S/ ' + totalPEN.toFixed(2);
+      if (elUSD) elUSD.textContent = '$ ' + totalUSD.toFixed(2);
 
       if (payments.length === 0) {
-        listContainer.innerHTML = \`<div class="p-6 text-center text-gray-500">No hay ingresos que coincidan con los filtros.</div>\`;
+        listContainer.innerHTML = '<div class="p-6 text-center text-gray-500">No hay ingresos que coincidan con los filtros.</div>';
         return;
       }
-      
-      let html = '';
-      for (const p of payments) {
-        const client = await db.clients.get(p.client_id);
-        const cName = client ? client.business_name : 'Cliente Desconocido';
-        const owner = client ? client.owner_name : '';
-        
-        html += \`
-          <div class="p-4 border-b border-gray-100 last:border-b-0 flex justify-between items-center">
-            <div style="flex:1;min-width:0">
-              <div class="font-bold text-gray-900 truncate">\${cName}</div>
-              <div class="text-xs text-gray-500 mt-1 truncate">\${owner}</div>
-              <div class="text-xs text-primary-600 font-semibold mt-1 truncate">\${p.concept}</div>
-              <div class="text-xs text-success mt-1">Pagado: \${window.format.datetime(p.paid_date)}</div>
-            </div>
-            <div class="text-right ml-4">
-              <div class="font-bold text-lg text-gray-900">
-                \${p.currency === 'USD' ? '$' : 'S/'}\${parseFloat(p.amount).toFixed(2)}
-              </div>
-              <button class="btn btn-outline btn-sm mt-3 py-1 px-3 text-xs" onclick="window.clientDetailPage.generateReceipt(\${p.id})">Recibo</button>
-            </div>
-          </div>
-        \`;
+
+      var html = '';
+      for (var j = 0; j < payments.length; j++) {
+        var pay = payments[j];
+        var client = await db.clients.get(pay.client_id);
+        var cName = client ? client.business_name : 'Cliente Desconocido';
+        var owner = client ? client.owner_name : '';
+        var currSymbol = pay.currency === 'USD' ? '$' : 'S/';
+        var amount = parseFloat(pay.amount).toFixed(2);
+        var paidDate = window.format.datetime(pay.paid_date);
+
+        html += '<div style="padding:14px 16px;border-bottom:1px solid var(--color-gray-100);display:flex;justify-content:space-between;align-items:center">' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-weight:700;color:var(--color-gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + cName + '</div>' +
+            '<div style="font-size:0.75rem;color:var(--color-gray-500);margin-top:2px">' + owner + '</div>' +
+            '<div style="font-size:0.75rem;color:var(--color-primary);font-weight:600;margin-top:2px">' + pay.concept + '</div>' +
+            '<div style="font-size:0.75rem;color:var(--color-success);margin-top:2px">Pagado: ' + paidDate + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;margin-left:12px">' +
+            '<div style="font-weight:700;font-size:1.1rem;color:var(--color-gray-900)">' + currSymbol + amount + '</div>' +
+            '<button class="btn btn-outline btn-sm" style="margin-top:8px;padding:3px 10px;font-size:0.7rem" onclick="window.incomePage.viewReceipt(' + pay.id + ')">Recibo</button>' +
+          '</div>' +
+        '</div>';
       }
       listContainer.innerHTML = html;
-      
+
     } catch (e) {
       console.error(e);
-      listContainer.innerHTML = \`<div class="p-6 text-center text-danger">Error: \${e.message}</div>\`;
+      listContainer.innerHTML = '<div class="p-6 text-center text-danger">Error: ' + e.message + '</div>';
     }
   },
 
-  exportCSV: async () => {
+  viewReceipt: function(paymentId) {
+    // Delegate to client-detail receipt generator if it exists
+    if (window.clientDetailPage && window.clientDetailPage.generateReceipt) {
+      window.clientDetailPage.generateReceipt(paymentId);
+    } else {
+      window.toast.error('Error', 'El generador de recibos no está disponible.');
+    }
+  },
+
+  exportCSV: async function() {
     try {
-      let payments = await db.payments.where('paid').equals(true).toArray();
-      
+      var payments = await db.payments.where('paid').equals(true).toArray();
+
       if (window.incomePage.currentFilterMonth) {
-        payments = payments.filter(p => p.paid_date && p.paid_date.startsWith(window.incomePage.currentFilterMonth));
+        payments = payments.filter(function(p) {
+          return p.paid_date && p.paid_date.startsWith(window.incomePage.currentFilterMonth);
+        });
       }
       if (window.incomePage.currentFilterType !== 'all') {
-        payments = payments.filter(p => p.concept.includes(window.incomePage.currentFilterType));
+        var ft = window.incomePage.currentFilterType;
+        payments = payments.filter(function(p) {
+          return p.concept && p.concept.indexOf(ft) !== -1;
+        });
       }
-      
+
       if (payments.length === 0) {
         window.toast.error('Sin datos', 'No hay pagos para exportar.');
         return;
       }
 
-      let csv = '\\uFEFFFecha de Pago,Cliente,Contacto,Concepto,Moneda,Monto\\n';
-      
-      for (const p of payments) {
-        const client = await db.clients.get(p.client_id);
-        const cName = client ? client.business_name.replace(/,/g, '') : 'Desconocido';
-        const owner = client ? client.owner_name.replace(/,/g, '') : '';
-        const concept = p.concept.replace(/,/g, '');
-        const date = window.format.datetime(p.paid_date).replace(/,/g, '');
-        
-        csv += \`\${date},\${cName},\${owner},\${concept},\${p.currency},\${p.amount}\\n\`;
+      var csv = '\uFEFFFecha de Pago,Cliente,Contacto,Concepto,Moneda,Monto\n';
+
+      for (var i = 0; i < payments.length; i++) {
+        var p = payments[i];
+        var client = await db.clients.get(p.client_id);
+        var cName = client ? client.business_name.replace(/,/g, '') : 'Desconocido';
+        var ownerN = client ? client.owner_name.replace(/,/g, '') : '';
+        var concept = p.concept.replace(/,/g, '');
+        var dateStr = window.format.datetime(p.paid_date).replace(/,/g, '');
+
+        csv += dateStr + ',' + cName + ',' + ownerN + ',' + concept + ',' + p.currency + ',' + p.amount + '\n';
       }
-      
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", \`ingresos_\${window.incomePage.currentFilterMonth || 'todos'}.csv\`);
+
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'ingresos_' + (window.incomePage.currentFilterMonth || 'todos') + '.csv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       window.toast.success('Exportado', 'El archivo Excel ha sido descargado.');
     } catch (e) {
       window.toast.error('Error', e.message);
     }
   },
 
-  clearAll: () => {
+  clearAll: function() {
     window.modal.show({
       title: 'Vaciar Registro',
       content: '¿Estás completamente seguro de que deseas eliminar TODOS los ingresos registrados? Esta acción no se puede deshacer.',
       confirmText: 'Sí, Eliminar Todo',
-      onConfirm: async () => {
-        // Necesitamos cerrar el primer modal y abrir el segundo
-        setTimeout(() => {
+      onConfirm: async function() {
+        setTimeout(function() {
           window.modal.show({
             title: 'Última Advertencia',
             content: 'Para evitar borrados accidentales, confirma esta acción.<br><br>Escribe <b>borrar</b> para confirmar:',
             confirmText: 'Confirmar Eliminación',
-            onConfirm: async () => {
-              const input = prompt("Escribe 'borrar' para confirmar:");
+            onConfirm: async function() {
+              var input = prompt("Escribe 'borrar' para confirmar:");
               if (input && input.toLowerCase() === 'borrar') {
                 try {
-                  const payments = await db.payments.where('paid').equals(true).toArray();
-                  const ids = payments.map(p => p.id);
+                  var allPaid = await db.payments.where('paid').equals(true).toArray();
+                  var ids = allPaid.map(function(p) { return p.id; });
                   await db.payments.bulkDelete(ids);
                   window.toast.success('Eliminado', 'Se vació el registro de ingresos.');
-                  await window.incomePage.init();
+                  await window.app.navigate('/income');
                 } catch (e) {
                   window.toast.error('Error', e.message);
                 }

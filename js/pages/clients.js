@@ -134,24 +134,17 @@ window.clientsPage = {
         }
         
         html += `
-          <div class="client-card" onclick="window.app.navigate('/client/${c.id}')">
-            <div style="display:flex;align-items:center;gap:14px">
-              <div class="client-avatar">
-                ${c.business_name ? c.business_name.charAt(0).toUpperCase() : '?'}
+          <div class="client-card" style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;color:var(--color-gray-900);font-size:0.95rem;line-height:1.2">${c.business_name}</div>
+              <div style="font-size:0.78rem;color:var(--color-gray-500);margin-top:2px">${c.owner_name || ''}</div>
+              <div style="font-size:0.72rem;color:var(--color-gray-400);margin-top:1px">Suscrito: ${window.format.date(c.created_at)}</div>
+              <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">
+                ${swNames.map(n => `<span style="display:inline-block;background:var(--color-primary);color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:6px">${n}</span>`).join('')}
               </div>
-              <div>
-                <div class="font-semibold" style="color:var(--color-gray-900);font-size:0.95rem">${c.business_name}</div>
-                <div class="text-xs text-gray-500 mt-2">${c.owner_name || ''}</div>
-                <div class="text-xs text-gray-400 mt-1">Suscrito: ${window.format.date(c.created_at)}</div>
-                <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
-                  ${swNames.map(n => `<span class="badge badge-primary" style="font-size:0.65rem;padding:2px 6px">${n}</span>`).join('')}
-                </div>
-              </div>
+              ${hasPending ? '<div style="font-size:0.7rem;color:var(--color-warning);font-weight:600;margin-top:4px">⚠ Pago pendiente</div>' : ''}
             </div>
-            <div style="display:flex;align-items:center;gap:8px">
-              ${hasPending ? '<span class="badge badge-warning" style="font-size:0.65rem">Deuda</span>' : '<span class="badge badge-success" style="font-size:0.65rem">Al día</span>'}
-              <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-gray-300)" stroke-width="2" style="width:18px"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
+            <button class="btn btn-primary btn-sm" style="white-space:nowrap;padding:6px 12px;font-size:0.72rem;flex-shrink:0" onclick="event.stopPropagation(); window.app.navigate('/client/${c.id}')">Ver detalles</button>
           </div>
         `;
       }

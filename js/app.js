@@ -135,6 +135,7 @@ window.app = {
       if (route === '/new') title = "Nueva Licencia";
       else if (route === '/clients') title = "Mis Clientes";
       else if (route === '/client-detail') title = "Detalle del Cliente";
+      else if (route === '/income') title = "Ingresos";
       else if (route === '/projects') title = "Proyectos";
       else if (route === '/settings') title = "Configuración";
       
