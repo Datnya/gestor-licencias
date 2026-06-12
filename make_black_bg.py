@@ -1,14 +1,13 @@
 import sys
 from PIL import Image
 
-def make_icon(input_path, output_path, bg_color=(0, 0, 0), size=512, padding=40):
+def make_icon(input_path, output_path, bg_color=(0, 0, 0), size=512, safe_zone_diameter=320):
     try:
         # Open the image with alpha channel
         img = Image.open(input_path).convert("RGBA")
         
-        # Calculate target size while keeping aspect ratio
-        target_max = size - (padding * 2)
-        ratio = min(target_max / img.width, target_max / img.height)
+        # Calculate target size so it fits inside the safe zone (to avoid being cut by Android circular icon)
+        ratio = min(safe_zone_diameter / img.width, safe_zone_diameter / img.height)
         new_size = (int(img.width * ratio), int(img.height * ratio))
         
         # Resize image smoothly
@@ -27,10 +26,10 @@ def make_icon(input_path, output_path, bg_color=(0, 0, 0), size=512, padding=40)
         final_img = background.convert("RGB")
         final_img.save(output_path, "PNG")
         
-        print(f"Successfully created {output_path} with proper padding and centering.")
+        print(f"Successfully created {output_path} with proper safe zone padding.")
     except Exception as e:
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    # Create the 512x512 icon
-    make_icon("assets/logo.png", "assets/logo_app.png", size=512, padding=30)
+    # Create the 512x512 icon, with a safe zone of 320px to ensure it fits in circular crop
+    make_icon("assets/logo.png", "assets/logo_app_v2.png", size=512, safe_zone_diameter=320)

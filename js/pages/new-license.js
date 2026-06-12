@@ -326,7 +326,8 @@ window.newLicensePage = {
         code: licenseCode,
         client_name: s.client.business_name,
         activated_device: s.deviceCode,
-        status: "active"
+        status: "active",
+        isActive: true
       };
       await window.githubAPI.addLicense(s.software.repo_path, ghLicense);
       

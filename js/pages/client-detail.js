@@ -333,6 +333,7 @@ window.clientDetailPage = {
           if (idx === -1) throw new Error("Licencia no encontrada en GitHub");
           
           content.licenses[idx].status = newStatus;
+          content.licenses[idx].isActive = (newStatus === 'active');
           
           await window.githubAPI.updateLicensesFile(repoPath, content, file.sha, `${actionName} licencia: ${code}`);
           
@@ -341,7 +342,7 @@ window.clientDetailPage = {
           await db.licenses.put(localLicense);
           
           await window.clientDetailPage.init(localLicense.client_id);
-          window.toast.success('Actualizado', `La licencia ha sido ${newStatus === 'active' ? 'reactivada' : 'suspendida'}.`);
+          window.toast.success('Actualizado', `La licencia ha sido ${newStatus === 'active' ? 'reactivada' : 'suspendida'}. (Atención: El servidor puede tardar hasta 5 minutos en reflejar el cambio en la aplicación del cliente).`);
         } catch (e) {
           window.toast.error('Error al actualizar', e.message);
           return true;
