@@ -227,7 +227,7 @@ window.newLicensePage = {
   },
 
   updateMaintenance: (source) => {
-    const exchangeRate = 3.8; // Fixed conversion rate
+    const exchangeRate = 3.4; // Fixed conversion rate
     if (source === 'USD') {
       const usd = parseFloat(document.getElementById('nlMaintenance').value) || 0;
       document.getElementById('nlMaintenancePEN').value = (usd * exchangeRate).toFixed(2);

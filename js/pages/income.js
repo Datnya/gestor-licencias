@@ -110,7 +110,7 @@ window.incomePage = {
         else rawTotalPEN += amt;
       }
 
-      var exchangeRate = 3.8;
+      var exchangeRate = 3.4;
       var unifiedTotalPEN = rawTotalPEN + (rawTotalUSD * exchangeRate);
       var unifiedTotalUSD = rawTotalUSD + (rawTotalPEN / exchangeRate);
 
