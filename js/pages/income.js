@@ -5,10 +5,10 @@ window.incomePage = {
 
   render: async function() {
     // Generar opciones de meses únicos
-    var payments = await db.payments.toArray();
+    var payments = await db.payments.filter(function(p) { return p.paid === 1; }).toArray();
     var months = new Set();
     payments.forEach(function(p) {
-      if (p.paid && p.paid_date) {
+      if (p.paid_date) {
         months.add(p.paid_date.substring(0, 7));
       }
     });
@@ -77,12 +77,13 @@ window.incomePage = {
   loadData: async function() {
     var listContainer = document.getElementById('incomeList');
     try {
-      var payments = await db.payments.where('paid').equals(true).toArray();
+      var payments = await db.payments.filter(function(p) { return p.paid === 1; }).toArray();
 
       // Filter by month
       if (window.incomePage.currentFilterMonth) {
+        var month = window.incomePage.currentFilterMonth;
         payments = payments.filter(function(p) {
-          return p.paid_date && p.paid_date.startsWith(window.incomePage.currentFilterMonth);
+          return p.paid_date && p.paid_date.startsWith(month);
         });
       }
 
@@ -104,8 +105,9 @@ window.incomePage = {
       var totalUSD = 0;
       for (var i = 0; i < payments.length; i++) {
         var p = payments[i];
-        if (p.currency === 'USD') totalUSD += parseFloat(p.amount);
-        else totalPEN += parseFloat(p.amount);
+        var amt = parseFloat(p.amount) || 0;
+        if (p.currency === 'USD') totalUSD += amt;
+        else totalPEN += amt;
       }
 
       var elPEN = document.getElementById('incomeTotalPEN');
@@ -114,7 +116,7 @@ window.incomePage = {
       if (elUSD) elUSD.textContent = '$ ' + totalUSD.toFixed(2);
 
       if (payments.length === 0) {
-        listContainer.innerHTML = '<div class="p-6 text-center text-gray-500">No hay ingresos que coincidan con los filtros.</div>';
+        listContainer.innerHTML = '<div class="p-6 text-center text-gray-500">No hay ingresos registrados.</div>';
         return;
       }
 
@@ -125,7 +127,7 @@ window.incomePage = {
         var cName = client ? client.business_name : 'Cliente Desconocido';
         var owner = client ? client.owner_name : '';
         var currSymbol = pay.currency === 'USD' ? '$' : 'S/';
-        var amount = parseFloat(pay.amount).toFixed(2);
+        var amount = (parseFloat(pay.amount) || 0).toFixed(2);
         var paidDate = window.format.datetime(pay.paid_date);
 
         html += '<div style="padding:14px 16px;border-bottom:1px solid var(--color-gray-100);display:flex;justify-content:space-between;align-items:center">' +
@@ -150,7 +152,6 @@ window.incomePage = {
   },
 
   viewReceipt: function(paymentId) {
-    // Delegate to client-detail receipt generator if it exists
     if (window.clientDetailPage && window.clientDetailPage.generateReceipt) {
       window.clientDetailPage.generateReceipt(paymentId);
     } else {
@@ -160,11 +161,12 @@ window.incomePage = {
 
   exportCSV: async function() {
     try {
-      var payments = await db.payments.where('paid').equals(true).toArray();
+      var payments = await db.payments.filter(function(p) { return p.paid === 1; }).toArray();
 
       if (window.incomePage.currentFilterMonth) {
+        var mo = window.incomePage.currentFilterMonth;
         payments = payments.filter(function(p) {
-          return p.paid_date && p.paid_date.startsWith(window.incomePage.currentFilterMonth);
+          return p.paid_date && p.paid_date.startsWith(mo);
         });
       }
       if (window.incomePage.currentFilterType !== 'all') {
@@ -186,7 +188,7 @@ window.incomePage = {
         var client = await db.clients.get(p.client_id);
         var cName = client ? client.business_name.replace(/,/g, '') : 'Desconocido';
         var ownerN = client ? client.owner_name.replace(/,/g, '') : '';
-        var concept = p.concept.replace(/,/g, '');
+        var concept = (p.concept || '').replace(/,/g, '');
         var dateStr = window.format.datetime(p.paid_date).replace(/,/g, '');
 
         csv += dateStr + ',' + cName + ',' + ownerN + ',' + concept + ',' + p.currency + ',' + p.amount + '\n';
@@ -222,7 +224,7 @@ window.incomePage = {
               var input = prompt("Escribe 'borrar' para confirmar:");
               if (input && input.toLowerCase() === 'borrar') {
                 try {
-                  var allPaid = await db.payments.where('paid').equals(true).toArray();
+                  var allPaid = await db.payments.filter(function(p) { return p.paid === 1; }).toArray();
                   var ids = allPaid.map(function(p) { return p.id; });
                   await db.payments.bulkDelete(ids);
                   window.toast.success('Eliminado', 'Se vació el registro de ingresos.');

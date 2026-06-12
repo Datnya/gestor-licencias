@@ -134,17 +134,17 @@ window.clientsPage = {
         }
         
         html += `
-          <div class="client-card" style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px">
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:700;color:var(--color-gray-900);font-size:0.95rem;line-height:1.2">${c.business_name}</div>
-              <div style="font-size:0.78rem;color:var(--color-gray-500);margin-top:2px">${c.owner_name || ''}</div>
-              <div style="font-size:0.72rem;color:var(--color-gray-400);margin-top:1px">Suscrito: ${window.format.date(c.created_at)}</div>
-              <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">
-                ${swNames.map(n => `<span style="display:inline-block;background:var(--color-primary);color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:6px">${n}</span>`).join('')}
-              </div>
-              ${hasPending ? '<div style="font-size:0.7rem;color:var(--color-warning);font-weight:600;margin-top:4px">⚠ Pago pendiente</div>' : ''}
+          <div class="client-card" style="padding:12px 14px;display:flex;flex-direction:column;gap:3px">
+            <div style="font-weight:700;color:var(--color-gray-900);font-size:0.95rem">${c.business_name}</div>
+            <div style="font-size:0.8rem;color:var(--color-gray-500)">${c.owner_name || ''}</div>
+            <div style="font-size:0.75rem;color:var(--color-gray-400)">Suscrito: ${window.format.date(c.created_at)}</div>
+            <div style="margin-top:3px">
+              ${swNames.map(n => `<span style="display:inline-block;background:var(--color-primary);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 10px;border-radius:6px;margin-right:4px">${n}</span>`).join('')}
             </div>
-            <button class="btn btn-primary btn-sm" style="white-space:nowrap;padding:6px 12px;font-size:0.72rem;flex-shrink:0" onclick="event.stopPropagation(); window.app.navigate('/client/${c.id}')">Ver detalles</button>
+            ${hasPending ? '<div style="font-size:0.72rem;color:var(--color-warning);font-weight:600;margin-top:2px">⚠ Pago pendiente</div>' : ''}
+            <div style="text-align:center;margin-top:6px">
+              <button class="btn btn-primary" style="padding:5px 20px;font-size:0.75rem;border-radius:8px" onclick="event.stopPropagation(); window.app.navigate('/client/${c.id}')">Ver detalles</button>
+            </div>
           </div>
         `;
       }
