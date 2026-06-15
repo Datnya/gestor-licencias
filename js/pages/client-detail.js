@@ -103,6 +103,9 @@ window.clientDetailPage = {
                 <button class="btn btn-outline btn-sm flex-1" style="font-size:0.75rem" onclick="window.clientDetailPage.toggleStatus(${l.id}, '${l.code}', '${l.status}', '${repoPath}')">
                   ${l.status === 'active' ? 'Suspender' : 'Reactivar'}
                 </button>
+                <button class="btn btn-outline btn-sm flex-1" style="font-size:0.75rem" onclick="window.clientDetailPage.changeDevice(${l.id}, '${l.code}', '${l.device_code}', '${repoPath}')">
+                  Cambiar Disp.
+                </button>
               </div>
             </div>
           `;
@@ -350,6 +353,54 @@ window.clientDetailPage = {
       }
     });
   },
+
+  changeDevice: async (localId, code, currentDevice, repoPath) => {
+    if (!repoPath || repoPath === 'null') {
+      window.toast.error('Error', 'No se encontró el repositorio asociado a este software.');
+      return;
+    }
+
+    window.modal.show({
+      title: 'Cambiar Dispositivo',
+      content: `
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label text-sm font-semibold mb-2 block">Nuevo Código de Dispositivo</label>
+          <input type="text" id="newDeviceCodeInput" class="form-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid #d1d5db" placeholder="Ej. MOB-ABC123XYZ" value="${currentDevice || ''}">
+          <p class="text-xs text-gray-500 mt-2">Pega aquí el nuevo código si el cliente desinstaló la app o cambió de equipo.</p>
+        </div>
+      `,
+      confirmText: 'Actualizar',
+      onConfirm: async () => {
+        const newDevice = document.getElementById('newDeviceCodeInput').value.trim().toUpperCase();
+        if(!newDevice) {
+          window.toast.error('Error', 'El código de dispositivo no puede estar vacío');
+          return true; // prevent close
+        }
+
+        try {
+          const file = await window.githubAPI.getLicensesFile(repoPath);
+          let content = file.content;
+          const idx = content.licenses.findIndex(l => l.code === code);
+          if (idx === -1) throw new Error("Licencia no encontrada en GitHub");
+          
+          content.licenses[idx].activated_device = newDevice;
+          
+          await window.githubAPI.updateLicensesFile(repoPath, content, file.sha, `Actualizado dispositivo para licencia: ${code}`);
+          
+          const localLicense = await db.licenses.get(localId);
+          localLicense.device_code = newDevice;
+          await db.licenses.put(localLicense);
+          
+          await window.clientDetailPage.init(localLicense.client_id);
+          window.toast.success('Dispositivo Actualizado', 'El cliente ya puede ingresar a su aplicación con normalidad.');
+        } catch (e) {
+          window.toast.error('Error al actualizar', e.message);
+          return true;
+        }
+      }
+    });
+  },
+  
   
   addPayment: async (clientId) => {
     // Show a modal to choose payment type
