@@ -221,7 +221,15 @@ window.clientDetailPage = {
       if (isAdvance) conceptDesc += ' (Adelanto del 50%)';
       if (isBalance) conceptDesc += ' (Saldo pendiente 50%)';
       
-      const renderContainer = document.getElementById('receiptRenderContainer');
+      let renderContainer = document.getElementById('receiptRenderContainer');
+      if (!renderContainer) {
+        renderContainer = document.createElement('div');
+        renderContainer.id = 'receiptRenderContainer';
+        renderContainer.style.position = 'absolute';
+        renderContainer.style.left = '-9999px';
+        renderContainer.style.top = '0';
+        document.body.appendChild(renderContainer);
+      }
       const currencySymbol = p.currency === 'USD' ? '$' : 'S/';
       
       renderContainer.innerHTML = `

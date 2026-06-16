@@ -166,7 +166,7 @@ window.incomePage = {
 
   exportCSV: async function() {
     try {
-      var payments = await db.payments.filter(function(p) { return p.paid === 1; }).toArray();
+      var payments = await db.payments.filter(function(p) { return !!p.paid; }).toArray();
 
       if (window.incomePage.currentFilterMonth) {
         var mo = window.incomePage.currentFilterMonth;
@@ -229,7 +229,7 @@ window.incomePage = {
               var input = prompt("Escribe 'borrar' para confirmar:");
               if (input && input.toLowerCase() === 'borrar') {
                 try {
-                  var allPaid = await db.payments.filter(function(p) { return p.paid === 1; }).toArray();
+                  var allPaid = await db.payments.filter(function(p) { return !!p.paid; }).toArray();
                   var ids = allPaid.map(function(p) { return p.id; });
                   await db.payments.bulkDelete(ids);
                   window.toast.success('Eliminado', 'Se vació el registro de ingresos.');
