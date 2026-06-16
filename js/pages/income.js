@@ -5,7 +5,7 @@ window.incomePage = {
 
   render: async function() {
     // Generar opciones de meses únicos
-    var payments = await db.payments.filter(function(p) { return p.paid === 1; }).toArray();
+    var payments = await db.payments.filter(function(p) { return !!p.paid; }).toArray();
     var months = new Set();
     payments.forEach(function(p) {
       if (p.paid_date) {
@@ -31,9 +31,10 @@ window.incomePage = {
           '</select>' +
           '<select id="incomeTypeFilter" class="form-select flex-1" onchange="window.incomePage.applyFilters()">' +
             '<option value="all">Cualquier concepto</option>' +
-            '<option value="Mantenimiento">Mantenimiento</option>' +
-            '<option value="Adelanto">Instalación (Adelanto)</option>' +
-            '<option value="Pago Único">Pago Único</option>' +
+            '<option value="Mantenimiento anual">Mantenimiento anual</option>' +
+            '<option value="Cancelación del saldo pendiente">Cancelación del saldo pendiente</option>' +
+            '<option value="Implementación">Implementación</option>' +
+            '<option value="Otros">Otros</option>' +
           '</select>' +
         '</div>' +
         '<button class="btn btn-primary" style="margin-top:20px;margin-bottom:10px" onclick="window.incomePage.exportCSV()">' +
@@ -77,7 +78,7 @@ window.incomePage = {
   loadData: async function() {
     var listContainer = document.getElementById('incomeList');
     try {
-      var payments = await db.payments.filter(function(p) { return p.paid === 1; }).toArray();
+      var payments = await db.payments.filter(function(p) { return !!p.paid; }).toArray();
 
       // Filter by month
       if (window.incomePage.currentFilterMonth) {

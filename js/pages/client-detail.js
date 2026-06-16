@@ -252,8 +252,12 @@ window.clientDetailPage = {
           </div>
           
           <div style="margin-bottom:24px">
-            <div style="font-weight:700;font-size:14px;margin-bottom:8px">Detalle:</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:8px">Concepto:</div>
             <div style="font-size:13px;color:#374151;line-height:1.5">${conceptDesc}</div>
+            ${p.details ? `
+            <div style="font-weight:700;font-size:14px;margin-top:12px;margin-bottom:8px">Detalle Adicional:</div>
+            <div style="font-size:13px;color:#374151;line-height:1.5">${p.details}</div>
+            ` : ''}
           </div>
           
           <div style="background:#f9fafb;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center">
@@ -283,6 +287,7 @@ window.clientDetailPage = {
       
       // Construir mensaje de WhatsApp
       let msg = `Hola *${c.owner_name}*, te envío el comprobante de pago por el software *${swName}*.\n\nMonto pagado: *${currencySymbol}${parseFloat(p.amount).toFixed(2)}*.\nConcepto: ${conceptDesc}`;
+      if (p.details) msg += `\nDetalle: ${p.details}`;
       if (isAdvance) {
         msg += `\n\n_Recuerda que queda pendiente el 50% para el próximo mes._`;
       }
@@ -409,7 +414,16 @@ window.clientDetailPage = {
       content: `
         <div class="form-group">
           <label class="form-label">Concepto</label>
-          <input type="text" id="newPayConcept" class="form-input" placeholder="Ej: Servicio Técnico, Mantenimiento...">
+          <select id="newPayConcept" class="form-select">
+            <option value="Mantenimiento anual">Mantenimiento anual</option>
+            <option value="Cancelación del saldo pendiente">Cancelación del saldo pendiente</option>
+            <option value="Implementación">Implementación</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Detalles (Opcional, sale en recibo)</label>
+          <input type="text" id="newPayDetails" class="form-input" placeholder="Ej: Pago de servidor 2026...">
         </div>
         <div class="form-group">
           <label class="form-label">Monto</label>
@@ -426,7 +440,8 @@ window.clientDetailPage = {
       confirmText: 'Crear Cobro',
       onConfirm: async () => {
         try {
-          const concept = document.getElementById('newPayConcept').value.trim();
+          const concept = document.getElementById('newPayConcept').value;
+          const details = document.getElementById('newPayDetails').value.trim();
           const amount = parseFloat(document.getElementById('newPayAmount').value) || 0;
           const currency = document.getElementById('newPayCurrency').value;
           
@@ -441,6 +456,7 @@ window.clientDetailPage = {
             license_id: null,
             software_id: null,
             concept: concept,
+            details: details,
             amount: amount,
             currency: currency,
             due_date: now,

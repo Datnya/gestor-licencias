@@ -65,18 +65,24 @@ window.dbAPI = {
       softwareCounts[sw.name] = licenses.filter(l => l.software_id === sw.id).length;
     }
     
-    const pendingPayments = await db.payments.filter(p => !p.paid).toArray();
-    
-    // Check maintenance renewals in next 30 days
     const today = new Date();
-    const nextMonth = new Date();
-    nextMonth.setDate(today.getDate() + 30);
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    const pendingPayments = await db.payments.filter(p => {
+      if (p.paid) return false;
+      if (!p.due_date) return false;
+      const d = new Date(p.due_date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }).toArray();
     
-    const maintenancePayments = await db.payments.filter(p => 
-      p.concept && p.concept.includes('Mantenimiento') && 
-      !p.paid && 
-      new Date(p.due_date) <= nextMonth
-    ).toArray();
+    const maintenancePayments = await db.payments.filter(p => {
+      if (p.paid) return false;
+      if (!p.due_date) return false;
+      if (!p.concept || !p.concept.includes('Mantenimiento')) return false;
+      const d = new Date(p.due_date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }).toArray();
 
     return {
       totalActive: active.length,
