@@ -49,7 +49,7 @@ window.clientDetailPage = {
             </div>` : ''}
             <div class="flex items-center gap-2 mt-1">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              Registrado: ${window.format.date(client.created_at)}
+              Registrado: ${window.format?.date ? window.format.date(client.created_at) : (client.created_at || '-')}
             </div>
           </div>
           <div class="flex items-center gap-4 mt-4">
@@ -148,9 +148,9 @@ window.clientDetailPage = {
                 </div>
                 <div class="text-xs text-primary-600 font-semibold mt-1">${swName}</div>
                 <div class="text-xs text-gray-500 mt-1">
-                  Vence: <span class="${isOverdue ? 'text-danger font-bold' : ''}">${window.format.date(p.due_date)}</span>
+                  Vence: <span class="${isOverdue ? 'text-danger font-bold' : ''}">${window.format?.date ? window.format.date(p.due_date) : (p.due_date || '-')}</span>
                 </div>
-                ${p.paid ? `<div class="text-xs text-success mt-1">Pagado el: ${window.format.date(p.paid_date)}</div>` : ''}
+                ${p.paid ? `<div class="text-xs text-success mt-1">Pagado el: ${window.format?.date ? window.format.date(p.paid_date) : (p.paid_date || '-')}</div>` : ''}
               </div>
               <div class="text-right">
                 <div class="font-bold text-lg ${!p.paid ? 'text-gray-900' : 'text-gray-400'}">
@@ -241,7 +241,7 @@ window.clientDetailPage = {
           
           <div style="text-align:center;margin-bottom:24px">
             <h2 style="font-size:16px;font-weight:700;margin:0">COMPROBANTE DE PAGO</h2>
-            <p style="font-size:12px;color:#6b7280;margin:4px 0 0 0">${window.format.datetime(p.paid_date)}</p>
+            <p style="font-size:12px;color:#6b7280;margin:4px 0 0 0">${window.format?.datetime ? window.format.datetime(p.paid_date) : (p.paid_date || '-')}</p>
           </div>
           
           <div style="border-top:2px dashed #e5e7eb;border-bottom:2px dashed #e5e7eb;padding:16px 0;margin-bottom:24px">

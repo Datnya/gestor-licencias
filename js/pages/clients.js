@@ -104,9 +104,17 @@ window.clientsPage = {
           return d >= from && d <= to;
         });
       } else if (window.clientsPage.currentFilter === 'newest') {
-        clients = clients.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+        clients = clients.sort((a,b) => {
+          const tB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          const tA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          return (isNaN(tB) ? 0 : tB) - (isNaN(tA) ? 0 : tA);
+        });
       } else if (window.clientsPage.currentFilter === 'oldest') {
-        clients = clients.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+        clients = clients.sort((a,b) => {
+          const tB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          const tA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          return (isNaN(tA) ? 0 : tA) - (isNaN(tB) ? 0 : tB);
+        });
       }
       
       if (clients.length === 0) {
@@ -137,7 +145,7 @@ window.clientsPage = {
           <div class="client-card" style="padding:12px 14px;display:flex;flex-direction:column;gap:3px">
             <div style="font-weight:700;color:var(--color-gray-900);font-size:0.95rem">${c.business_name}</div>
             <div style="font-size:0.8rem;color:var(--color-gray-500)">${c.owner_name || ''}</div>
-            <div style="font-size:0.75rem;color:var(--color-gray-400)">Suscrito: ${window.format.date(c.created_at)}</div>
+            <div style="font-size:0.75rem;color:var(--color-gray-400)">Suscrito: ${window.format?.date ? window.format.date(c.created_at) : (c.created_at || '-')}</div>
             <div style="margin-top:4px">
               ${swNames.map(n => `<span style="display:inline-block;color:#f97316;font-size:0.8rem;font-weight:800;margin-right:4px">${n}</span>`).join('')}
             </div>
