@@ -29,7 +29,7 @@ window.newLicensePage = {
                   </div>
                   <div>
                     <div class="font-bold">Computadora (Windows)</div>
-                    <div class="text-xs text-gray-500">Se genera código automático</div>
+                    <div class="text-xs text-gray-500">Requiere ID de la Computadora</div>
                   </div>
                 </div>
               </button>
@@ -40,7 +40,7 @@ window.newLicensePage = {
                   </div>
                   <div>
                     <div class="font-bold">Celular (Android)</div>
-                    <div class="text-xs text-gray-500">Requiere código del dispositivo</div>
+                    <div class="text-xs text-gray-500">Requiere ID del celular</div>
                   </div>
                 </div>
               </button>
@@ -70,16 +70,16 @@ window.newLicensePage = {
           </div>
           
           <!-- Paso 3 -->
-          <div id="step3" style="display:none" class="animation-fade">
+            <div id="step3" style="display:none" class="animation-fade">
             <h3 class="font-bold mb-4">Código del Dispositivo</h3>
             <div id="deviceCodeInputContainer">
-              <p class="text-sm text-gray-500 mb-4">Ingresa el código que aparece en la pantalla del celular del cliente.</p>
+              <p class="text-sm text-gray-500 mb-4">Ingresa el ID que aparece en la pantalla del dispositivo del cliente (PC o Celular).</p>
               <div class="form-group">
-                <input type="text" id="newLicenseDevice" class="form-input text-center text-xl tracking-widest font-mono" placeholder="DEV-XXXXXX" maxlength="20">
+                <input type="text" id="newLicenseDevice" class="form-input text-center text-xl tracking-widest font-mono" placeholder="ID del Dispositivo" maxlength="100">
               </div>
             </div>
             <div id="deviceCodeAutoContainer" style="display:none">
-              <p class="text-sm text-gray-500 mb-4">La licencia para PC se genera de forma automática. No necesitas ingresar ningún código del dispositivo.</p>
+              <p class="text-sm text-gray-500 mb-4">La licencia se generará de forma automática.</p>
               <div class="p-4 bg-primary-50 text-primary-700 text-center rounded-lg font-mono mb-4 text-sm">Autogenerado al guardar</div>
             </div>
             
@@ -201,13 +201,10 @@ window.newLicensePage = {
     const inputContainer = document.getElementById('deviceCodeInputContainer');
     const autoContainer = document.getElementById('deviceCodeAutoContainer');
     
-    if (type === 'PC') {
-      inputContainer.style.display = 'none';
-      autoContainer.style.display = 'block';
-    } else {
-      inputContainer.style.display = 'block';
-      autoContainer.style.display = 'none';
-    }
+    // Ahora AMBOS requieren código del dispositivo.
+    inputContainer.style.display = 'block';
+    autoContainer.style.display = 'none';
+
     window.newLicensePage.nextStep(2);
   },
   
@@ -270,12 +267,10 @@ window.newLicensePage = {
   },
   
   verifyDevice: async () => {
-    let deviceCode = document.getElementById('newLicenseDevice').value.trim().toUpperCase();
+    let deviceCode = document.getElementById('newLicenseDevice').value.trim();
     
-    if (window.newLicensePage.state.type === 'PC') {
-      deviceCode = 'PC-AUTO';
-    } else if (!deviceCode) {
-      window.toast.error('Error', 'Ingresa el código del dispositivo');
+    if (!deviceCode) {
+      window.toast.error('Error', 'Ingresa el ID del dispositivo');
       return;
     }
     
@@ -285,7 +280,7 @@ window.newLicensePage = {
     
     try {
       const sw = window.newLicensePage.state.software;
-      const isUsed = window.newLicensePage.state.type !== 'PC' && await window.githubAPI.isDeviceUsed(sw.repo_path, deviceCode);
+      const isUsed = await window.githubAPI.isDeviceUsed(sw.repo_path, deviceCode);
       if (isUsed) {
         window.toast.error('Error', 'Este dispositivo ya está vinculado a otra licencia en este repositorio.');
         btn.textContent = 'Validar y Continuar';
@@ -381,7 +376,7 @@ window.newLicensePage = {
       
       document.getElementById('nlResultCode').textContent = licenseCode;
       if (s.type === 'PC') {
-        document.getElementById('lblSuccessMsg').textContent = 'Copia este código autogenerado y pásaselo a tu cliente para que active su programa en Windows.';
+        document.getElementById('lblSuccessMsg').textContent = 'Pásale este código a tu cliente para que active su programa en Windows.';
         document.getElementById('btnCopyCode').style.display = 'block';
       } else {
         document.getElementById('lblSuccessMsg').textContent = 'Dictale este código a tu cliente para que active su aplicación.';
